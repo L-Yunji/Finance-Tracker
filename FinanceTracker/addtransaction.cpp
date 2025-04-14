@@ -12,8 +12,9 @@
 #include <QLocale>
 #include <QComboBox>
 
-AddTransaction::AddTransaction(QWidget *parent)
+AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
     : QWidget(parent),
+    expenseFlag(isExpense),
     displayLabel(nullptr),
     keyboardWidget(nullptr),
     keyboardLayout(nullptr),
@@ -56,7 +57,8 @@ void AddTransaction::setupUI()
     backBtn->setFixedSize(40, 40);
     backBtn->setStyleSheet("font-size: 20px; background: transparent; border: none;");
 
-    getSendHeader = new QLabel("보내기");
+    QString titleText = expenseFlag ? "보내기" : "가져오기";
+    getSendHeader = new QLabel(titleText);
     getSendHeader->setAlignment(Qt::AlignCenter);
     QFont titleFont;
     titleFont.setPointSize(18);
@@ -83,7 +85,18 @@ void AddTransaction::setupUI()
 
     // 3. 카테고리 콤보박스
     categoryComboBox = new QComboBox(this);
-    categoryComboBox->addItems({"식비", "교통", "쇼핑", "기타"});
+    if (expenseFlag) {
+        // 출금일 때
+        categoryComboBox->addItem("식비");
+        categoryComboBox->addItem("교통");
+        categoryComboBox->addItem("쇼핑");
+        categoryComboBox->addItem("기타");
+    } else {
+        // 입금일 때
+        categoryComboBox->addItem("월급");
+        categoryComboBox->addItem("용돈");
+        categoryComboBox->addItem("기타");
+    }
     categoryComboBox->setStyleSheet(R"(
     QComboBox {
         background-color: white;
@@ -256,7 +269,7 @@ void AddTransaction::handleContinueClicked()
     data.amount = rawAmount;
     data.category = category;
     data.dateTime = datetime;
-    data.isExpense = true;  // 지금은 보내기 화면이니까 출금으로 고정
+    data.isExpense = expenseFlag;  // 출금 또는 입금으로 구분
 
     // 3. 전역 거래 리스트에 저장하기
     TransactionStore::allTransactions.append(data);
