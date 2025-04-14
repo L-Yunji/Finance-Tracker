@@ -15,6 +15,7 @@ class AddTransaction : public QWidget
 
 public:
     explicit AddTransaction(QWidget *parent = nullptr);
+    explicit AddTransaction(bool isExpense = true, QWidget *parent = nullptr);
     ~AddTransaction() override;
 
 private:
@@ -40,6 +41,9 @@ private:
     QPushButton *Btn00;
     QPushButton *Btn0;
     QPushButton *BtnDelete;
+
+private:
+    bool expenseFlag;  // 출금이면 true, 입금이면 false
 
 private slots:
     void deleteButtonClicked();

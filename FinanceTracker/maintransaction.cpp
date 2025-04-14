@@ -73,13 +73,21 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     // sendBtn 클릭 시 AddTransaction 창 띄우기
     connect(sendBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction();
+        AddTransaction *addWin = new AddTransaction(true); // true = 출금
 
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
 
         addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
         addWin->show();
     });
+
+    connect(getBtn, &QPushButton::clicked, this, [=]() {
+        AddTransaction *addWin = new AddTransaction(false);  // false = 입금
+        connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
+        addWin->move(this->x() + 30, this->y() + 30);
+        addWin->show();
+    });
+
 
     // 히스토리 헤더
     mainLayout->addSpacing(12);
@@ -128,21 +136,6 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     // 스크롤 영역만 mainLayout에 추가!
     mainLayout->addWidget(scrollArea);
-
-    // 거래 1건 추가
-    historyListLayout->addWidget(createHistoryItem(
-        "2024-10-04 오전 11시",  // 날짜
-        "네이버 쇼핑",   // 제목
-        "출금",  // 출금/입금
-        "13,500원",   // 금액
-        QColor("#1E40FF")   // 파란색
-        ));
-
-    historyListLayout->addWidget(createHistoryItem(
-        "2024-10-03 오후 4시",
-        "지하철 교통카드",
-        "출금", "1,250원",
-        QColor("#1E40FF")));
 
     // 저장된 거래 내역 불러오기
     loadTransactionHistory();
