@@ -38,6 +38,7 @@ private:
     QWidget *scrollContent;
     QVBoxLayout *historyListLayout; // 거래 리스트를 저장할 레이아웃
     void loadTransactionHistory(); // 거래 내역 불러오기 함수 선언
+    void updateCurrentBalance();  // 현재 잔액 업데이트 함수
 
     // 거래 내역 카드 component
     QWidget* createHistoryItem(
