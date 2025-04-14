@@ -102,7 +102,7 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     // 거래 1건 추가
     historyListLayout->addWidget(createHistoryItem(
-        ":/shoppingIc.png",  // 아이콘 경로
+        ":/icons/shoppingIc.png",  // 아이콘 경로
         "2024-10-04 오전 11시",  // 날짜
         "네이버 쇼핑",   // 제목
         "출금",  // 출금/입금
@@ -128,23 +128,21 @@ QWidget* MainTransaction::createHistoryItem(
     const QColor &typeColor
     ) {
     QWidget *itemWidget = new QWidget;
+    itemWidget->setFixedHeight(64);
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);
     layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(10);
 
     // 1. 아이콘
     QLabel *iconLabel = new QLabel;
-    // 리소스 대신 절대 경로로 테스트
-    QPixmap icon(":/shoppingIc.png");
-
+    QPixmap icon(iconPath);
     if (icon.isNull()) {
-        qDebug() << "❌ 절대 경로로도 이미지 못 불러옴!";
-    } else {
-        qDebug() << "✅ 절대 경로로 이미지 불러오기 성공!";
+        qDebug() << "❌ 이미지 로드 실패! 경로 확인: " << iconPath;
     }
 
     iconLabel->setPixmap(icon.scaled(28, 28)); // 아이콘 크기 설정
     layout->addWidget(iconLabel);
+
 
     // 2. 날짜 + 제목 (위/아래 텍스트)
     QVBoxLayout *textLayout = new QVBoxLayout;
