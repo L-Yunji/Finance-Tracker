@@ -14,6 +14,8 @@ qt_add_executable(FinanceTracker
     addtransaction.h addtransaction.cpp
     maintransaction.h maintransaction.cpp
     icons.qrc
+    TransactionData.h
+    TransactionStore.h
 )
 
 target_link_libraries(FinanceTracker

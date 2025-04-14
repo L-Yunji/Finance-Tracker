@@ -1,4 +1,7 @@
 #include "addtransaction.h"
+#include "TransactionData.h"
+#include "TransactionStore.h"
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -244,19 +247,21 @@ void AddTransaction::deleteButtonClicked()
 
 void AddTransaction::handleContinueClicked()
 {
-    // 1. 금액 텍스트 가져오기
-    QString rawAmount = displayLabel->text();  // 예: "₩2,000"
-    rawAmount.remove(QRegularExpression("[₩,\\s]"));  // ₩, 쉼표, 공백 제거
-
-    // 2. 카테고리 가져오기
+    QString rawAmount = displayLabel->text();
+    rawAmount.remove(QRegularExpression("[₩,\\s]"));
     QString category = categoryComboBox->currentText();
-
-    // 3. 현재 날짜/시간
     QString datetime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
-    // 4. 로그 출력 (일단 확인용)
-    qDebug() << "[완료 버튼 클릭]";
-    qDebug() << "카테고리:" << category;
-    qDebug() << "금액:" << rawAmount;
-    qDebug() << "시간:" << datetime;
+    TransactionData data;
+    data.amount = rawAmount;
+    data.category = category;
+    data.dateTime = datetime;
+    data.isExpense = true;  // 지금은 보내기 화면이니까 출금으로 고정
+
+    // 3. 전역 거래 리스트에 저장하기
+    TransactionStore::allTransactions.append(data);
+
+    // 확인용 로그
+    qDebug() << "[Transaction 저장됨]";
+    qDebug() << data.amount << data.category << data.dateTime << data.isExpense;
 }
