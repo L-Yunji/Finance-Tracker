@@ -85,7 +85,18 @@ void AddTransaction::setupUI()
 
     // 3. 카테고리 콤보박스
     categoryComboBox = new QComboBox(this);
-    categoryComboBox->addItems({"식비", "교통", "쇼핑", "기타"});
+    if (expenseFlag) {
+        // 출금일 때
+        categoryComboBox->addItem("식비");
+        categoryComboBox->addItem("교통");
+        categoryComboBox->addItem("쇼핑");
+        categoryComboBox->addItem("기타");
+    } else {
+        // 입금일 때
+        categoryComboBox->addItem("월급");
+        categoryComboBox->addItem("용돈");
+        categoryComboBox->addItem("기타");
+    }
     categoryComboBox->setStyleSheet(R"(
     QComboBox {
         background-color: white;
