@@ -1,4 +1,6 @@
 #include "maintransaction.h"
+#include "TransactionStore.h"
+#include "addtransaction.h"
 
 MainTransaction::MainTransaction(QWidget *parent)
     : QMainWindow(parent)
@@ -69,6 +71,15 @@ MainTransaction::MainTransaction(QWidget *parent)
     btnLayout->addWidget(sendBtn);
     mainLayout->addLayout(btnLayout);
 
+    // sendBtn 클릭 시 AddTransaction 창 띄우기
+    connect(sendBtn, &QPushButton::clicked, this, [=]() {
+        AddTransaction *addWin = new AddTransaction();
+
+        // connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
+        addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
+        addWin->show();
+    });
+
     // 히스토리 헤더
     mainLayout->addSpacing(12);
     QHBoxLayout *headerLayout = new QHBoxLayout();
@@ -106,7 +117,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     // 내부 콘텐츠 위젯 + 레이아웃
     QWidget *scrollContent = new QWidget;
 
-    QVBoxLayout *historyListLayout = new QVBoxLayout(scrollContent);
+    historyListLayout = new QVBoxLayout(scrollContent); // 멤버 변수로 초기화
     historyListLayout->setAlignment(Qt::AlignTop);
     historyListLayout->setSpacing(8);
     historyListLayout->setContentsMargins(0, 0, 0, 0);
@@ -132,7 +143,8 @@ MainTransaction::MainTransaction(QWidget *parent)
         "출금", "1,250원",
         QColor("#1E40FF")));
 
-
+    // 저장된 거래 내역 불러오기
+    loadTransactionHistory();
     // 중앙 위젯 세팅
     setCentralWidget(centralWidget);
 }
@@ -183,6 +195,38 @@ QWidget* MainTransaction::createHistoryItem(
     return itemWidget;
 
 }
+
+void MainTransaction::loadTransactionHistory()
+{
+    // 기존 리스트 정리
+    QLayoutItem *child;
+    while ((child = historyListLayout->takeAt(0)) != nullptr) {
+        if (child->widget()) delete child->widget();
+        delete child;
+    }
+
+    // 저장된 거래 내역 모두 출력
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        QString type = data.isExpense ? "출금" : "입금";
+        QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#3A9D23");
+
+        QWidget *item = createHistoryItem(
+            data.dateTime,
+            data.category,
+            type,
+            data.amount + "원",
+            color
+            );
+
+        historyListLayout->addWidget(item);
+    }
+}
+
+void MainTransaction::refreshTransactionList() {
+    loadTransactionHistory();
+}
+
+
 
 
 MainTransaction::~MainTransaction() {

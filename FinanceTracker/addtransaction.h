@@ -45,6 +45,9 @@ private slots:
     void deleteButtonClicked();
     void handleContinueClicked(); // 완료 버튼 눌렀을 때 호출 될 함수
 
+signals:
+    void transactionAdded();  // 거래 추가됨을 알리는 시그널
+
 private:
     void setupUI();
     void setupKeyboard();

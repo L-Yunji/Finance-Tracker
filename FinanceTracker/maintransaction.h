@@ -36,7 +36,8 @@ private:
     // scroll 영역 component
     QScrollArea *scrollArea;
     QWidget *scrollContent;
-    QVBoxLayout *historyListLayout;
+    QVBoxLayout *historyListLayout; // 거래 리스트를 저장할 레이아웃
+    void loadTransactionHistory(); // 거래 내역 불러오기 함수 선언
 
     // 거래 내역 카드 component
     QWidget* createHistoryItem(
@@ -46,6 +47,10 @@ private:
         const QString &amount,
         const QColor &typeColor
         );
+
+public slots:
+    void refreshTransactionList();
+
 
 };
 #endif // MAINTRANSACTION_H
