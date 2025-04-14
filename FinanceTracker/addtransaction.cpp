@@ -57,7 +57,6 @@ void AddTransaction::setupUI()
     getSendHeader->setAlignment(Qt::AlignCenter);
     QFont titleFont;
     titleFont.setPointSize(18);
-    titleFont.setBold(true);
     getSendHeader->setFont(titleFont);
 
     innerHeaderLayout->addWidget(backBtn, 0, 0, Qt::AlignLeft);
@@ -74,11 +73,9 @@ void AddTransaction::setupUI()
     font.setPointSize(32);
     font.setBold(true);
     displayLabel->setFont(font);
-    displayLabel->setStyleSheet("color: black;");
+    displayLabel->setStyleSheet("color: black");
     displayLabel->setFixedHeight(70);
     mainLayout->addWidget(displayLabel);
-
-
     mainLayout->addSpacing(12);
 
     // 3. 카테고리 콤보박스
@@ -137,10 +134,12 @@ void AddTransaction::setupUI()
     }
 )");
     continueButton->setFixedHeight(50);  // 높이 통일
-
     mainLayout->addWidget(continueButton);
-
     mainLayout->addSpacing(12);
+
+    // continueBtnClick 시 slot 연결
+    connect(continueButton, &QPushButton::clicked, this, &AddTransaction::handleContinueClicked);
+
 }
 
 void AddTransaction::handleKeyInput(const QString &input)
@@ -241,4 +240,23 @@ void AddTransaction::deleteButtonClicked()
     }
 
     displayLabel->setText(formattedText);
+}
+
+void AddTransaction::handleContinueClicked()
+{
+    // 1. 금액 텍스트 가져오기
+    QString rawAmount = displayLabel->text();  // 예: "₩2,000"
+    rawAmount.remove(QRegularExpression("[₩,\\s]"));  // ₩, 쉼표, 공백 제거
+
+    // 2. 카테고리 가져오기
+    QString category = categoryComboBox->currentText();
+
+    // 3. 현재 날짜/시간
+    QString datetime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+
+    // 4. 로그 출력 (일단 확인용)
+    qDebug() << "[완료 버튼 클릭]";
+    qDebug() << "카테고리:" << category;
+    qDebug() << "금액:" << rawAmount;
+    qDebug() << "시간:" << datetime;
 }

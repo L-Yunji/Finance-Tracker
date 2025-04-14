@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QComboBox>
+#include <QDateTime>
 
 class AddTransaction : public QWidget
 {
@@ -42,6 +43,7 @@ private:
 
 private slots:
     void deleteButtonClicked();
+    void handleContinueClicked(); // 완료 버튼 눌렀을 때 호출 될 함수
 
 private:
     void setupUI();

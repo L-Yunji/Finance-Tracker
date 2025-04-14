@@ -5,6 +5,7 @@ MainTransaction::MainTransaction(QWidget *parent)
 {
     setFixedSize(360, 640);
     setStyleSheet("background-color: white;");
+    setWindowTitle("계좌 관리");
 
     // 루트 위젯 & 레이아웃
     QWidget *centralWidget = new QWidget(this);
