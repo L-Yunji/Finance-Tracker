@@ -102,7 +102,6 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     // 거래 1건 추가
     historyListLayout->addWidget(createHistoryItem(
-        ":/icons/shoppingIc.png",  // 아이콘 경로
         "2024-10-04 오전 11시",  // 날짜
         "네이버 쇼핑",   // 제목
         "출금",  // 출금/입금
@@ -120,7 +119,6 @@ MainTransaction::MainTransaction(QWidget *parent)
 }
 
 QWidget* MainTransaction::createHistoryItem(
-    const QString &iconPath,
     const QString &date,
     const QString &title,
     const QString &type,
@@ -133,18 +131,7 @@ QWidget* MainTransaction::createHistoryItem(
     layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(10);
 
-    // 1. 아이콘
-    QLabel *iconLabel = new QLabel;
-    QPixmap icon(iconPath);
-    if (icon.isNull()) {
-        qDebug() << "❌ 이미지 로드 실패! 경로 확인: " << iconPath;
-    }
-
-    iconLabel->setPixmap(icon.scaled(28, 28)); // 아이콘 크기 설정
-    layout->addWidget(iconLabel);
-
-
-    // 2. 날짜 + 제목 (위/아래 텍스트)
+    // 1. 날짜 + 제목 (위/아래 텍스트)
     QVBoxLayout *textLayout = new QVBoxLayout;
     QLabel *labelDate = new QLabel(date);
     labelDate->setStyleSheet("color: gray; font-size: 12px;");
@@ -155,7 +142,7 @@ QWidget* MainTransaction::createHistoryItem(
     textLayout->addWidget(labelTitle);
     layout->addLayout(textLayout);
 
-    // 3. 오른쪽에 출금/금액
+    // 2. 오른쪽에 출금/금액
     QLabel *labelType = new QLabel(type);
     labelType->setStyleSheet(QString("color: %1; font-weight: bold;").arg(typeColor.name()));
 

@@ -34,7 +34,6 @@ private:
 
     // 거래 내역 카드 component
     QWidget* createHistoryItem(
-        const QString &iconPath,
         const QString &date,
         const QString &title,
         const QString &type,
