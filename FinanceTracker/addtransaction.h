@@ -41,12 +41,14 @@ private:
     QPushButton *BtnDelete;
 
 private slots:
-    void buttonClicked();
     void deleteButtonClicked();
 
 private:
     void setupUI();
     void setupKeyboard();
+    void handleKeyInput(const QString &input);
+    void buttonClicked();
+
 };
 
 #endif // ADDTRANSACTION_H

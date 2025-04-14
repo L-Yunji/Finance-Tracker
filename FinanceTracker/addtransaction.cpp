@@ -1,4 +1,3 @@
-// addtransaction.cpp
 #include "addtransaction.h"
 #include <QWidget>
 #include <QVBoxLayout>
@@ -8,9 +7,10 @@
 #include <QLabel>
 #include <QString>
 #include <QLocale>
+#include <QComboBox>
 
-AddTransaction::AddTransaction(QWidget *parent) :
-    QWidget(parent),
+AddTransaction::AddTransaction(QWidget *parent)
+    : QWidget(parent),
     displayLabel(nullptr),
     keyboardWidget(nullptr),
     keyboardLayout(nullptr),
@@ -18,36 +18,40 @@ AddTransaction::AddTransaction(QWidget *parent) :
     Btn6(nullptr), Btn7(nullptr), Btn8(nullptr), Btn9(nullptr), Btn00(nullptr),
     Btn0(nullptr), BtnDelete(nullptr)
 {
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
     setupUI();
     setupKeyboard();
-    mainLayout->addWidget(displayLabel);
-    mainLayout->addWidget(keyboardWidget);
-    setLayout(mainLayout);
+
     setWindowTitle("키패드 입력");
-    setFixedSize(280, 500); // 크기 조절
+    setFixedSize(360, 640);
+    setContentsMargins(32, 0, 32, 32);
 }
 
-AddTransaction::~AddTransaction()
-{
-}
+AddTransaction::~AddTransaction() {}
 
 void AddTransaction::setupUI()
 {
     // 전체 배경 스타일
-    this->setStyleSheet("background-color: #f0f2f5;");
+    this->setStyleSheet("background-color: white;");
 
-    // 상단 헤더
+    // 전체 메인 레이아웃
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
+    this->setLayout(mainLayout);
+
+    // 1. 상단 헤더
     QHBoxLayout *headerLayout = new QHBoxLayout();
     QWidget *headerWidget = new QWidget();
-    headerWidget->setStyleSheet("background-color: #3b82f6; border-top-left-radius: 20px; border-top-right-radius: 20px;");
-    headerWidget->setFixedHeight(60);
+    headerWidget->setFixedHeight(40);
 
-    QHBoxLayout *innerHeaderLayout = new QHBoxLayout(headerWidget);
+    QGridLayout *innerHeaderLayout = new QGridLayout(headerWidget);
+    innerHeaderLayout->setContentsMargins(0, 0, 0, 0);
+    innerHeaderLayout->setColumnStretch(0, 1);
+    innerHeaderLayout->setColumnStretch(1, 2);
+    innerHeaderLayout->setColumnStretch(2, 1);
 
     backBtn = new QPushButton("←");
     backBtn->setFixedSize(40, 40);
-    backBtn->setStyleSheet("color: white; font-size: 20px; background: transparent; border: none;");
+    backBtn->setStyleSheet("font-size: 20px; background: transparent; border: none;");
 
     getSendHeader = new QLabel("보내기");
     getSendHeader->setAlignment(Qt::AlignCenter);
@@ -55,152 +59,158 @@ void AddTransaction::setupUI()
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     getSendHeader->setFont(titleFont);
-    getSendHeader->setStyleSheet("color: white;");
 
-    innerHeaderLayout->addWidget(backBtn);
-    innerHeaderLayout->addStretch();
-    innerHeaderLayout->addWidget(getSendHeader);
-    innerHeaderLayout->addStretch();
-
+    innerHeaderLayout->addWidget(backBtn, 0, 0, Qt::AlignLeft);
+    innerHeaderLayout->addWidget(getSendHeader, 0, 1, Qt::AlignCenter);
+    headerWidget->setLayout(innerHeaderLayout);
     headerLayout->addWidget(headerWidget);
+    mainLayout->addLayout(headerLayout);
 
-    // 금액 표시
-    displayLabel = new QLabel("₩ 0");
-    displayLabel->setAlignment(Qt::AlignCenter);
+    mainLayout->addSpacing(12);
+
+    // 2. 금액 표시
+    displayLabel = new QLabel("₩0");
     QFont font = displayLabel->font();
-    font.setPointSize(28);
+    font.setPointSize(32);
     font.setBold(true);
     displayLabel->setFont(font);
-    displayLabel->setStyleSheet("color: black; background-color: white; padding: 15px; border-radius: 15px;");
+    displayLabel->setStyleSheet("color: black;");
     displayLabel->setFixedHeight(70);
+    mainLayout->addWidget(displayLabel);
 
-    // 카테고리 콤보박스
+
+    mainLayout->addSpacing(12);
+
+    // 3. 카테고리 콤보박스
     categoryComboBox = new QComboBox(this);
-    categoryComboBox->addItem("🍽️ 식비");
-    categoryComboBox->addItem("🚌 교통");
-    categoryComboBox->addItem("🛍️ 쇼핑");
-    categoryComboBox->addItem("📦 기타");
-    categoryComboBox->setStyleSheet("font-size: 14px; padding: 10px; border-radius: 10px; background-color: white;");
-    categoryComboBox->setFixedHeight(45);
-
-    // Continue 버튼
-    continueButton = new QPushButton("Continue", this);
-    continueButton->setStyleSheet("background-color: black; color: white; font-size: 16px; padding: 10px; border-radius: 10px;");
-    continueButton->setFixedHeight(45);
-
-    // 카테고리 + 버튼 레이아웃
-    QVBoxLayout *categoryLayout = new QVBoxLayout();
-    categoryLayout->addWidget(categoryComboBox);
-    categoryLayout->addWidget(continueButton);
-
-    // 전체 메인 레이아웃 구성
-    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout *>(this->layout());
-    if (!mainLayout) {
-        mainLayout = new QVBoxLayout(this);
-        this->setLayout(mainLayout);
+    categoryComboBox->addItems({"식비", "교통", "쇼핑", "기타"});
+    categoryComboBox->setStyleSheet(R"(
+    QComboBox {
+        background-color: white;
+        border: 1px solid #D5D6DA;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 14px;
+        color: #333333;
     }
 
-    mainLayout->setContentsMargins(15, 15, 15, 15);
-    mainLayout->addLayout(headerLayout);
-    mainLayout->addSpacing(10);
-    mainLayout->addWidget(displayLabel);
-    mainLayout->addSpacing(10);
-    mainLayout->addLayout(categoryLayout);
+    QComboBox::drop-down {
+        subcontrol-origin: padding;
+        subcontrol-position: top right;
+        width: 24px;
+        border-left: 1px solid #D5D6DA;
+    }
+
+    QComboBox::down-arrow {
+        width: 12px;
+        height: 12px;
+    }
+
+    QComboBox QAbstractItemView {
+        background-color: white;
+        border: 1px solid #D5D6DA;
+        selection-background-color: #B3D5FF;
+        padding: 6px;
+    }
+)");
+    categoryComboBox->setFixedHeight(45);  // 높이 통일
+    mainLayout->addWidget(categoryComboBox);
+    mainLayout->addSpacing(8);
+
+    // 4. Continue 버튼
+    continueButton = new QPushButton("완료", this);
+    continueButton->setStyleSheet(R"(
+    QPushButton {
+        background-color: #151515;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+    }
+    QPushButton:hover {
+        background-color: #303030;
+    }
+    QPushButton:pressed {
+        background-color: #000000;
+    }
+)");
+    continueButton->setFixedHeight(50);  // 높이 통일
+
+    mainLayout->addWidget(continueButton);
+
+    mainLayout->addSpacing(12);
 }
 
+void AddTransaction::handleKeyInput(const QString &input)
+{
+    QString currentText = displayLabel->text();
+    currentText.remove(QRegularExpression("[^0-9]")); // 숫자만 남김
 
+    if (currentText == "0") {
+        currentText = input;
+    } else {
+        currentText += input;
+    }
 
+    QLocale locale = QLocale::system();
+    QString formatted = locale.toString(currentText.toLongLong());
 
+    displayLabel->setText("₩" + formatted);
+}
 
 void AddTransaction::setupKeyboard()
 {
     keyboardWidget = new QWidget();
     keyboardLayout = new QGridLayout(keyboardWidget);
-    keyboardLayout->setSpacing(10);
+    keyboardLayout->setSpacing(12);
     keyboardLayout->setContentsMargins(10, 10, 10, 10);
 
-    QStringList buttonLabels = { "1", "2", "3",
-                                "4", "5", "6",
-                                "7", "8", "9",
-                                "00", "0", "←" };
+    // 숫자 키패드 라벨
+    QStringList keys = { "1", "2", "3",
+                        "4", "5", "6",
+                        "7", "8", "9",
+                        "00", "0", "←" };
 
-    QList<QPushButton**> buttonPointers = {
-        &Btn1, &Btn2, &Btn3,
-        &Btn4, &Btn5, &Btn6,
-        &Btn7, &Btn8, &Btn9,
-        &Btn00, &Btn0, &BtnDelete
-    };
-
-    for (int i = 0; i < buttonLabels.size(); ++i) {
+    for (int i = 0; i < keys.size(); ++i) {
         int row = i / 3;
         int col = i % 3;
-        QPushButton* btn = new QPushButton(buttonLabels[i]);
-        btn->setFixedSize(50, 50);
-        btn->setStyleSheet("font-size: 20px;");
+
+        QPushButton *btn = new QPushButton(keys[i]);
+        btn->setFixedSize(70, 70);
+        btn->setStyleSheet(R"(
+            QPushButton {
+                background-color: #F0F0F0;
+                font-size: 20px;
+                font-weight: bold;
+                border: none;
+                border-radius: 12px;
+            }
+            QPushButton:hover {
+                background-color: #e0e0e0;
+            }
+        )");
+
         keyboardLayout->addWidget(btn, row, col);
-        *buttonPointers[i] = btn;
+
+        if (keys[i] == "←") {
+            connect(btn, &QPushButton::clicked, this, &AddTransaction::deleteButtonClicked);
+        } else {
+            connect(btn, &QPushButton::clicked, [=]() {
+                handleKeyInput(keys[i]);
+            });
+        }
     }
 
     keyboardWidget->setLayout(keyboardLayout);
 
-    // 시그널 연결
-    connect(Btn1, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn2, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn3, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn4, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn5, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn6, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn7, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn8, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn9, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn00, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(Btn0, &QPushButton::clicked, this, &AddTransaction::buttonClicked);
-    connect(BtnDelete, &QPushButton::clicked, this, &AddTransaction::deleteButtonClicked);
+    // 키패드를 메인 레이아웃에 추가
+    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout *>(this->layout());
+    if (mainLayout) {
+        mainLayout->addWidget(keyboardWidget);
+    }
 }
-
-void AddTransaction::buttonClicked()
-{
-    QPushButton *clickedButton = qobject_cast<QPushButton *>(sender());
-    if (!clickedButton) return;
-
-    QString currentText = displayLabel->text();
-    QString buttonText = clickedButton->text();
-
-    // 쉼표 제거
-    currentText.remove(',');
-
-    // 입력 초기화
-    if (currentText == "0" && buttonText != ".") {
-        currentText = buttonText;
-    } else if (buttonText == ".") {
-        if (!currentText.contains('.')) {
-            currentText += buttonText;
-        }
-    } else {
-        currentText += buttonText;
-    }
-
-    // 소수점 분리
-    QString integerPart = currentText;
-    QString decimalPart;
-
-    if (currentText.contains('.')) {
-        QStringList parts = currentText.split('.');
-        integerPart = parts[0];
-        decimalPart = parts[1];
-    }
-
-    // 숫자 포맷 적용 (정수 부분만)
-    QLocale locale = QLocale::system(); // 또는 QLocale(QLocale::English) 등으로 명시 가능
-    QString formattedText = locale.toString(integerPart.toLongLong());
-
-    if (!decimalPart.isEmpty()) {
-        formattedText += "." + decimalPart;
-    }
-
-    displayLabel->setText(formattedText);
-}
-
 
 void AddTransaction::deleteButtonClicked()
 {
