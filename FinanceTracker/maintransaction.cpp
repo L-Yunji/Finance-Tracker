@@ -81,11 +81,10 @@ MainTransaction::MainTransaction(QWidget *parent)
         addWin->show();
     });
     connect(getBtn, &QPushButton::clicked, this, [=]() {
-    AddTransaction *addWin = new AddTransaction();
-
-    // connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
-    addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
-    addWin->show();
+        AddTransaction *addWin = new AddTransaction();
+        connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
+        addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
+        addWin->show();
     });
 
     connect(getBtn, &QPushButton::clicked, this, [=]() {
@@ -222,9 +221,22 @@ void MainTransaction::loadTransactionHistory()
         historyListLayout->addWidget(item);
     }
 }
+void MainTransaction::updateCurrentBalance()
+{
+    long long total = 0;
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        long long amount = data.amount.toLongLong();
+        total += data.isExpense ? -amount : amount;
+    }
+
+    QLocale locale = QLocale::system();
+    QString formatted = locale.toString(total);
+    curMoney->setText("₩" + formatted);
+}
 
 void MainTransaction::refreshTransactionList() {
     loadTransactionHistory();
+    updateCurrentBalance();
 }
 
 
