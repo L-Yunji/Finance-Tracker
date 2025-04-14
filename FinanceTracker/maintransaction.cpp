@@ -95,10 +95,10 @@ MainTransaction::MainTransaction(QWidget *parent)
     headerLayout->addWidget(filterBtn);
     mainLayout->addLayout(headerLayout);
 
-    // 거래 항목 1줄
     // 거래 리스트용 레이아웃 만들기
     QVBoxLayout *historyListLayout = new QVBoxLayout;
     historyListLayout->setSpacing(8);
+    historyListLayout->setContentsMargins(0, 0, 0, 0);  // 여백 제거
 
     // 거래 1건 추가
     historyListLayout->addWidget(createHistoryItem(
@@ -108,6 +108,19 @@ MainTransaction::MainTransaction(QWidget *parent)
         "13,500원",   // 금액
         QColor("#1E40FF")   // 파란색
         ));
+
+    historyListLayout->addWidget(createHistoryItem(
+        "2024-10-03 오후 4시",
+        "지하철 교통카드",
+        "출금", "1,250원",
+        QColor("#1E40FF")));
+
+    historyListLayout->addWidget(createHistoryItem(
+        "2024-10-03 오전 9시",
+        "월급 입금",
+        "입금",
+        "3,000,000원",
+        QColor("#3A9D23")));
 
     // mainLayout에 넣어줘야 보임!
     mainLayout->addLayout(historyListLayout);
@@ -131,7 +144,7 @@ QWidget* MainTransaction::createHistoryItem(
     layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(10);
 
-    // 1. 날짜 + 제목 (위/아래 텍스트)
+    // 1. 날짜 + 제목
     QVBoxLayout *textLayout = new QVBoxLayout;
     QLabel *labelDate = new QLabel(date);
     labelDate->setStyleSheet("color: gray; font-size: 12px;");
@@ -142,19 +155,27 @@ QWidget* MainTransaction::createHistoryItem(
     textLayout->addWidget(labelTitle);
     layout->addLayout(textLayout);
 
-    // 2. 오른쪽에 출금/금액
+    // 2. 오른쪽에 출금/입금 + 금액
+    QVBoxLayout *amountLayout = new QVBoxLayout;
+    amountLayout->setSpacing(0);
+    amountLayout->setAlignment(Qt::AlignRight);
+
     QLabel *labelType = new QLabel(type);
-    labelType->setStyleSheet(QString("color: %1; font-weight: bold;").arg(typeColor.name()));
+    labelType->setStyleSheet(QString("color: %1; font-size: 12px; font-weight: bold;").arg(typeColor.name()));
+    labelType->setAlignment(Qt::AlignRight);
 
     QLabel *labelAmount = new QLabel(amount);
     labelAmount->setStyleSheet("font-size: 14px; font-weight: bold;");
+    labelAmount->setAlignment(Qt::AlignRight);
 
-    layout->addStretch(); // 중간에 공간 줌
-    layout->addWidget(labelType);
-    layout->addSpacing(8);
-    layout->addWidget(labelAmount);
+    amountLayout->addWidget(labelType);
+    amountLayout->addWidget(labelAmount);
+
+    layout->addStretch(); // 좌우 사이 간격 벌려줌
+    layout->addLayout(amountLayout);
 
     return itemWidget;
+
 }
 
 
