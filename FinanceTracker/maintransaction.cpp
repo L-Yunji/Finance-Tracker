@@ -81,13 +81,6 @@ MainTransaction::MainTransaction(QWidget *parent)
         addWin->show();
     });
     connect(getBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction();
-        connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
-        addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
-        addWin->show();
-    });
-
-    connect(getBtn, &QPushButton::clicked, this, [=]() {
         AddTransaction *addWin = new AddTransaction(false);  // false = 입금
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
         addWin->move(this->x() + 30, this->y() + 30);
