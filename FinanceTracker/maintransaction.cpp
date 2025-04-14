@@ -96,9 +96,25 @@ MainTransaction::MainTransaction(QWidget *parent)
     mainLayout->addLayout(headerLayout);
 
     // 거래 리스트용 레이아웃 만들기
-    QVBoxLayout *historyListLayout = new QVBoxLayout;
+    // 스크롤 영역 생성
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setFixedHeight(360);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    // 내부 콘텐츠 위젯 + 레이아웃
+    QWidget *scrollContent = new QWidget;
+
+    QVBoxLayout *historyListLayout = new QVBoxLayout(scrollContent);
+    historyListLayout->setAlignment(Qt::AlignTop);
     historyListLayout->setSpacing(8);
-    historyListLayout->setContentsMargins(0, 0, 0, 0);  // 여백 제거
+    historyListLayout->setContentsMargins(0, 0, 0, 0);
+
+    // 연결
+    scrollArea->setWidget(scrollContent);
+
+    // 스크롤 영역만 mainLayout에 추가!
+    mainLayout->addWidget(scrollArea);
 
     // 거래 1건 추가
     historyListLayout->addWidget(createHistoryItem(
@@ -114,17 +130,6 @@ MainTransaction::MainTransaction(QWidget *parent)
         "지하철 교통카드",
         "출금", "1,250원",
         QColor("#1E40FF")));
-
-    historyListLayout->addWidget(createHistoryItem(
-        "2024-10-03 오전 9시",
-        "월급 입금",
-        "입금",
-        "3,000,000원",
-        QColor("#3A9D23")));
-
-    // mainLayout에 넣어줘야 보임!
-    mainLayout->addLayout(historyListLayout);
-
 
 
     // 중앙 위젯 세팅

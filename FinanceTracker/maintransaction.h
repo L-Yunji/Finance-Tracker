@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QScrollArea>
 
 class MainTransaction : public QMainWindow
 {
@@ -31,6 +32,11 @@ private:
     QLabel *shoppingIc;
     QLabel *detailHisDate;
     QLabel *detailHisMoney;
+
+    // scroll 영역 component
+    QScrollArea *scrollArea;
+    QWidget *scrollContent;
+    QVBoxLayout *historyListLayout;
 
     // 거래 내역 카드 component
     QWidget* createHistoryItem(
