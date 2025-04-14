@@ -1,10 +1,52 @@
+// addtransaction.h
 #ifndef ADDTRANSACTION_H
 #define ADDTRANSACTION_H
 
-class addtransaction
+#include <QWidget>
+#include <QGridLayout>
+#include <QPushButton>
+#include <QLabel>
+#include <QComboBox>
+
+class AddTransaction : public QWidget
 {
+    Q_OBJECT
+
 public:
-    addtransaction();
+    explicit AddTransaction(QWidget *parent = nullptr);
+    ~AddTransaction() override;
+
+private:
+    // UI elements
+    QLabel *displayLabel;
+    QWidget *keyboardWidget;
+    QGridLayout *keyboardLayout;
+    QPushButton *backBtn;
+    QLabel *getSendHeader;
+    QComboBox *categoryComboBox;
+    QPushButton *continueButton;
+
+    // Keyboard buttons
+    QPushButton *Btn1;
+    QPushButton *Btn2;
+    QPushButton *Btn3;
+    QPushButton *Btn4;
+    QPushButton *Btn5;
+    QPushButton *Btn6;
+    QPushButton *Btn7;
+    QPushButton *Btn8;
+    QPushButton *Btn9;
+    QPushButton *Btn00;
+    QPushButton *Btn0;
+    QPushButton *BtnDelete;
+
+private slots:
+    void buttonClicked();
+    void deleteButtonClicked();
+
+private:
+    void setupUI();
+    void setupKeyboard();
 };
 
 #endif // ADDTRANSACTION_H
