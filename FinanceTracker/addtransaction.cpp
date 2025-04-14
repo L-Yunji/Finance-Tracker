@@ -261,6 +261,9 @@ void AddTransaction::handleContinueClicked()
     // 3. 전역 거래 리스트에 저장하기
     TransactionStore::allTransactions.append(data);
 
+    emit transactionAdded();  // 시그널 발생
+    this->close();            // 창 닫기
+
     // 확인용 로그
     qDebug() << "[Transaction 저장됨]";
     qDebug() << data.amount << data.category << data.dateTime << data.isExpense;

@@ -75,7 +75,8 @@ MainTransaction::MainTransaction(QWidget *parent)
     connect(sendBtn, &QPushButton::clicked, this, [=]() {
         AddTransaction *addWin = new AddTransaction();
 
-        // connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
+        connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
+
         addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
         addWin->show();
     });
