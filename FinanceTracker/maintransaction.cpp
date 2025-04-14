@@ -79,6 +79,13 @@ MainTransaction::MainTransaction(QWidget *parent)
         addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
         addWin->show();
     });
+    connect(getBtn, &QPushButton::clicked, this, [=]() {
+    AddTransaction *addWin = new AddTransaction();
+
+    // connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
+    addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
+    addWin->show();
+    });
 
     // 히스토리 헤더
     mainLayout->addSpacing(12);
