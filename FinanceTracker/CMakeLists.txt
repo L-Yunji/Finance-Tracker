@@ -11,6 +11,8 @@ qt_add_executable(FinanceTracker
     widget.cpp
     widget.h
     widget.ui
+    addtransaction.h addtransaction.cpp
+    maintransaction.h maintransaction.cpp
 )
 
 target_link_libraries(FinanceTracker
