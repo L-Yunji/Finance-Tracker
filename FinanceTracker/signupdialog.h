@@ -12,6 +12,7 @@ public:
 
 private slots:
     void handleSignup();
+    void showWarningDialog(const QString &message);
 
 private:
     QLineEdit *usernameEdit;
