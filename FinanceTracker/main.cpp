@@ -1,5 +1,6 @@
 #include "maintransaction.h"
 #include "TransactionData.h"
+#include "detailtransaction.h"
 
 #include <QApplication>
 

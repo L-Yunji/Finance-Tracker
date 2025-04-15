@@ -4,6 +4,8 @@
 #include "detailtransaction.h"
 #include <QMouseEvent>
 #include <QVariant>
+#include <QToolButton>
+#include <QMenu>
 
 MainTransaction::MainTransaction(QWidget *parent)
     : QMainWindow(parent)
@@ -33,8 +35,10 @@ MainTransaction::MainTransaction(QWidget *parent)
     mainLayout->addLayout(layoutBalanceSection);
 
     QHBoxLayout *btnLayout = new QHBoxLayout();
-    getBtn = new QPushButton("가져오기");
-    sendBtn = new QPushButton("보내기");
+    getBtn = new QPushButton("수입");
+    sendBtn = new QPushButton("지출");
+    getBtn->setCursor(Qt::PointingHandCursor);
+    sendBtn->setCursor(Qt::PointingHandCursor);
     getBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;
@@ -86,19 +90,69 @@ MainTransaction::MainTransaction(QWidget *parent)
     QHBoxLayout *headerLayout = new QHBoxLayout();
     listHistoryTitle = new QLabel("거래 내역");
     listHistoryTitle->setStyleSheet("font-size: 18px;");
-    filterBtn = new QPushButton("전체");
-    filterBtn->setStyleSheet(R"(
-    QPushButton {
+    filterBtn = new QToolButton(this);
+    filterBtn->setText("전체");
+    filterBtn->setPopupMode(QToolButton::InstantPopup);
+    filterBtn->setCursor(Qt::PointingHandCursor);
+
+    QMenu *filterMenu = new QMenu(filterBtn);
+    filterMenu->setStyleSheet(R"(
+    QMenu {
         background-color: white;
-        color: #333333;
-        border: 1px solid #D0D0D0;
+        border: none;
         border-radius: 12px;
+        padding: 0;
+        margin: 0;
+    }
+    QMenu::item {
+        background-color: white;
+        color: #030303;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin: 2px;
+    }
+    QMenu::item:selected {
+        background-color: #B3D5FF;
+        color: white;
+    }
+    QMenu::separator {
+        height: 1px;
+        background: #D5D6DA;
+        margin: 4px 0;
+    }
+    )");
+
+    connect(filterMenu, &QMenu::aboutToShow, [=]() {
+        filterMenu->setFixedWidth(filterBtn->width());
+    });
+
+    filterMenu->addAction("전체", this, &MainTransaction::filterAll);
+    filterMenu->addAction("입금", this, &MainTransaction::filterDeposit);
+    filterMenu->addAction("출금", this, &MainTransaction::filterWithdrawal);
+    filterBtn->setMenu(filterMenu);
+
+    filterBtn->setStyleSheet(R"(
+    QToolButton {
+        background-color: #D5D6DA;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 16px;
         font-size: 14px;
         font-weight: bold;
-        padding: 6px 12px;
+        color: #030303;
     }
-    QPushButton:hover {
-        background-color: #f0f0f0;
+    QToolButton:hover {
+        background-color: #B3D5FF;
+    }
+    QToolButton:pressed {
+        background-color: #000000;
+        color: white;
+    }
+    QToolButton::menu-indicator {
+        subcontrol-origin: padding;
+        subcontrol-position: center right;
+        image: none;
     }
     )");
 
@@ -141,55 +195,22 @@ MainTransaction::MainTransaction(QWidget *parent)
     setCentralWidget(centralWidget);
 }
 
-QWidget* MainTransaction::createHistoryItem(const TransactionData &data)
-{
-    QWidget *itemWidget = new QWidget;
-    itemWidget->setFixedHeight(64);
-    itemWidget->installEventFilter(this);
-    itemWidget->setProperty("transaction", QVariant::fromValue(data));
+void MainTransaction::filterAll() {
+    currentFilter = "전체";
+    filterBtn->setText("전체");
+    refreshTransactionList();
+}
 
-    QHBoxLayout *layout = new QHBoxLayout(itemWidget);
-    layout->setContentsMargins(8, 8, 8, 8);
-    layout->setSpacing(10);
+void MainTransaction::filterDeposit() {
+    currentFilter = "입금";
+    filterBtn->setText("입금");
+    refreshTransactionList();
+}
 
-    QVBoxLayout *textLayout = new QVBoxLayout;
-    QLabel *labelDate = new QLabel(data.dateTime);
-    labelDate->setStyleSheet("color: gray; font-size: 12px;");
-    QLabel *labelTitle = new QLabel(data.category);
-    labelTitle->setStyleSheet("font-size: 14px; font-weight: bold;");
-    textLayout->setSpacing(0);
-    textLayout->addWidget(labelDate);
-    textLayout->addWidget(labelTitle);
-    layout->addLayout(textLayout);
-
-    QVBoxLayout *amountLayout = new QVBoxLayout;
-    amountLayout->setSpacing(0);
-    amountLayout->setAlignment(Qt::AlignRight);
-
-    QString typeText = data.isExpense ? "출금" : "입금";
-    QColor typeColor = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
-
-    QLabel *labelType = new QLabel(typeText);
-    labelType->setStyleSheet(QString("color: %1; font-size: 12px; font-weight: bold;").arg(typeColor.name()));
-    labelType->setAlignment(Qt::AlignRight);
-
-    QLabel *labelAmount = new QLabel(data.amount + "원");
-    labelAmount->setStyleSheet("font-size: 14px; font-weight: bold;");
-    labelAmount->setAlignment(Qt::AlignRight);
-
-    amountLayout->addWidget(labelType);
-    amountLayout->addWidget(labelAmount);
-
-    layout->addStretch();
-    layout->addLayout(amountLayout);
-
-    itemWidget->setCursor(Qt::PointingHandCursor);
-
-    // 클릭 이벤트 연결
-    itemWidget->installEventFilter(this);
-    itemWidget->setProperty("transaction", QVariant::fromValue(data));
-
-    return itemWidget;
+void MainTransaction::filterWithdrawal() {
+    currentFilter = "출금";
+    filterBtn->setText("출금");
+    refreshTransactionList();
 }
 
 void MainTransaction::loadTransactionHistory()
@@ -201,8 +222,101 @@ void MainTransaction::loadTransactionHistory()
     }
 
     for (const TransactionData &data : TransactionStore::allTransactions) {
-        historyListLayout->addWidget(createHistoryItem(data));
+        if (currentFilter == "전체" ||
+            (currentFilter == "입금" && !data.isExpense) ||
+            (currentFilter == "출금" && data.isExpense)) {
+
+            QString type = data.isExpense ? "출금" : "입금";
+            QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
+
+            QWidget *item = createHistoryItem(
+                data.dateTime,
+                data.category,
+                type,
+                data.amount + "원",
+                color
+            );
+            historyListLayout->addWidget(item);
+        }
     }
+}
+
+QWidget* MainTransaction::createHistoryItem(
+    const QString &date,
+    const QString &category,
+    const QString &type,
+    const QString &amount,
+    const QColor &typeColor
+)
+{
+    QWidget *itemWidget = new QWidget;
+    itemWidget->setFixedHeight(64);
+    itemWidget->setCursor(Qt::PointingHandCursor);
+
+    QHBoxLayout *layout = new QHBoxLayout(itemWidget);
+    layout->setContentsMargins(8, 8, 8, 8);
+    layout->setSpacing(10);
+
+    QHBoxLayout *leftLayout = new QHBoxLayout;
+    leftLayout->setContentsMargins(0,0,0,0);
+    leftLayout->setSpacing(12);
+
+    QLabel *iconLabel = new QLabel;
+    iconLabel->setFixedSize(40,40);
+    static QMap<QString, QString> categoryIconMap = {
+        { "식비",    "food.png" },
+        { "교통",    "transport.png" },
+        { "쇼핑",    "shopping.png" },
+        { "월급",    "salary.png" },
+        { "용돈",    "allowance.png" },
+        { "기타",    "default.png" }
+    };
+
+    QPixmap iconPixmap;
+    if (categoryIconMap.contains(category))
+        iconPixmap = QPixmap(categoryIconMap.value(category));
+    else
+        iconPixmap = QPixmap(":/icons/icons/default.png");
+
+    if (!iconPixmap.isNull()) {
+        iconLabel->setPixmap(iconPixmap.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+    leftLayout->addWidget(iconLabel);
+
+    QVBoxLayout *textLayout = new QVBoxLayout;
+    textLayout->setSpacing(2);
+    textLayout->setContentsMargins(0, 0, 0, 0);
+
+    QLabel *dateLabel = new QLabel(date);
+    dateLabel->setStyleSheet("font-size: 12px; color: gray;");
+    textLayout->addWidget(dateLabel);
+
+    QLabel *categoryLabel = new QLabel(category);
+    categoryLabel->setStyleSheet("font-size: 14px; font-weight: bold; color: #030303;");
+    textLayout->addWidget(categoryLabel);
+
+    leftLayout->addLayout(textLayout);
+    layout->addLayout(leftLayout);
+
+    QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->setContentsMargins(0,0,0,0);
+    rightLayout->setSpacing(0);
+    rightLayout->setAlignment(Qt::AlignRight);
+
+    QLabel *typeLabel = new QLabel(type);
+    typeLabel->setStyleSheet(QString("font-size: 12px; font-weight: bold; color: %1;").arg(typeColor.name()));
+    typeLabel->setAlignment(Qt::AlignRight);
+    rightLayout->addWidget(typeLabel);
+
+    QLabel *amountLabel = new QLabel(amount);
+    amountLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
+    amountLabel->setAlignment(Qt::AlignRight);
+    rightLayout->addWidget(amountLabel);
+
+    layout->addStretch();
+    layout->addLayout(rightLayout);
+
+    return itemWidget;
 }
 
 void MainTransaction::updateCurrentBalance()
@@ -228,16 +342,10 @@ void MainTransaction::showDetailWindow(const TransactionData &data)
     DetailTransaction *dtWin = new DetailTransaction();
     dtWin->setTransaction(data);
     dtWin->setAttribute(Qt::WA_DeleteOnClose);
-
-    // 현재 창 위치 기준으로 약간 오른쪽 아래로 띄우기
-    int offsetX = 30;
-    int offsetY = 30;
-    dtWin->move(this->x() + offsetX, this->y() + offsetY);
-
+    dtWin->move(this->x() + 30, this->y() + 30);
     dtWin->show();
     connect(dtWin, &DetailTransaction::transactionUpdated, this, &MainTransaction::refreshTransactionList);
     connect(dtWin, &DetailTransaction::transactionDeleted, this, &MainTransaction::refreshTransactionList);
-
 }
 
 bool MainTransaction::eventFilter(QObject *watched, QEvent *event)

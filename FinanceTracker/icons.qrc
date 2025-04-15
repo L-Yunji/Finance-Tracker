@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/shoppingIc.png</file>
+        <file>icons/allowance.png</file>
+        <file>icons/default.png</file>
+        <file>icons/food.png</file>
+        <file>icons/salary.png</file>
+        <file>icons/shopping.png</file>
+        <file>icons/transport.png</file>
     </qresource>
 </RCC>
