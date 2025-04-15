@@ -14,8 +14,6 @@
 #include <QMap>
 #include <QDebug>
 #include <QImageReader>
-#include "detailtransaction.h"
-#include "TransactionData.h"
 
 class MainTransaction : public QMainWindow
 {
@@ -26,6 +24,7 @@ public:
     ~MainTransaction();
 
 private:
+    // UI 요소 선언
     QLabel *curMoneyTitle;
     QLabel *curMoney;
 
@@ -43,17 +42,21 @@ private:
     QLabel *detailHisDate;
     QLabel *detailHisMoney;
 
+    // scroll 영역 component
     QScrollArea *scrollArea;
     QWidget *scrollContent;
-    QVBoxLayout *historyListLayout;
+    QVBoxLayout *historyListLayout; // 거래 리스트를 저장할 레이아웃
+    void loadTransactionHistory(); // 거래 내역 불러오기 함수 선언
+    void updateCurrentBalance();  // 현재 잔액 업데이트 함수
 
-    void loadTransactionHistory();
-    void updateCurrentBalance();
-    void showDetailWindow(const TransactionData &data);
-
-    bool eventFilter(QObject *watched, QEvent *event) override;
-
-    QWidget* createHistoryItem(const TransactionData &data);
+    // 거래 내역 카드 component
+    QWidget* createHistoryItem(
+        const QString &date,
+        const QString &title,
+        const QString &type,
+        const QString &amount,
+        const QColor &typeColor
+        );
 
 public slots:
     void refreshTransactionList();
@@ -64,5 +67,4 @@ public slots:
 
 
 };
-
 #endif // MAINTRANSACTION_H
