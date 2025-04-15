@@ -45,12 +45,12 @@ MainTransaction::MainTransaction(QWidget *parent)
     layoutBalanceSection->addLayout(topRow);
 
     curMoneyTitle = new QLabel("현재 잔액");
-    curMoneyTitle->setStyleSheet("font-size: 18px;");
+    curMoneyTitle->setStyleSheet("font-size: 18px; color: #4F4F4F;");
     curMoneyTitle->setFixedHeight(38);
     curMoneyTitle->setContentsMargins(0, 0, 0, 0);
     curMoney = new QLabel("₩0");
-    curMoney->setStyleSheet("font-size: 32px; font-weight: bold;");
-    curMoney->setFixedHeight(38);
+    curMoney->setStyleSheet("font-size: 42px; font-weight: bold;");
+    curMoney->setFixedHeight(50);
 
     layoutBalanceSection->addWidget(curMoneyTitle);
     layoutBalanceSection->addWidget(curMoney);
@@ -66,7 +66,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     getBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;
-        color: #1E40FF;
+        color: #3033A2;
         font-size: 16px;
         font-weight: bold;
         border: none;
@@ -81,7 +81,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     sendBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;
-        color: #1E40FF;
+        color: #3033A2;
         font-size: 16px;
         font-weight: bold;
         border: none;
@@ -113,7 +113,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     mainLayout->addSpacing(12);
     QHBoxLayout *headerLayout = new QHBoxLayout();
     listHistoryTitle = new QLabel("거래 내역");
-    listHistoryTitle->setStyleSheet("font-size: 18px;");
+    listHistoryTitle->setStyleSheet("font-size: 18px; color: #4F4F4F;");
     filterBtn = new QToolButton(this);
     filterBtn->setText("전체");
     filterBtn->setPopupMode(QToolButton::InstantPopup);
@@ -158,19 +158,18 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     filterBtn->setStyleSheet(R"(
     QToolButton {
-        background-color: #D5D6DA;
-        border: none;
+        background-color: transparent;
+        border: 1px solid #D5D6DA;
         border-radius: 12px;
         padding: 8px 16px;
         font-size: 14px;
-        font-weight: bold;
         color: #030303;
     }
     QToolButton:hover {
-        background-color: #B3D5FF;
+        background-color: #cddfff;
     }
     QToolButton:pressed {
-        background-color: #000000;
+        background-color: #030303;
         color: white;
     }
     QToolButton::menu-indicator {
@@ -178,7 +177,7 @@ MainTransaction::MainTransaction(QWidget *parent)
         subcontrol-position: center right;
         image: none;
     }
-    )");
+)");
 
     headerLayout->addWidget(listHistoryTitle);
     headerLayout->addStretch();
@@ -309,7 +308,11 @@ QWidget* MainTransaction::createHistoryItem(const TransactionData &data)
     typeLabel->setAlignment(Qt::AlignRight);
     rightLayout->addWidget(typeLabel);
 
-    QLabel *amountLabel = new QLabel(data.amount + "원");
+    // 천 단위 쉼표 넣기
+    QLocale locale = QLocale::system();
+    QString formattedAmount = locale.toString(data.amount.toLongLong());
+
+    QLabel *amountLabel = new QLabel(formattedAmount + "원");
     amountLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
     amountLabel->setAlignment(Qt::AlignRight);
     rightLayout->addWidget(amountLabel);
