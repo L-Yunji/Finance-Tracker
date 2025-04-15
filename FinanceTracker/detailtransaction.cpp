@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QMessageBox>
+#include <QLocale>
 
 DetailTransaction::DetailTransaction(QWidget *parent)
     : QWidget(parent)
@@ -138,7 +139,6 @@ void DetailTransaction::setupUI()
     deleteBtn->setFixedHeight(45);
     connect(deleteBtn, &QPushButton::clicked, this, &DetailTransaction::onDeleteClicked);
 
-
     mainLayout->addWidget(updateBtn);
     mainLayout->addWidget(deleteBtn);
 }
@@ -159,7 +159,10 @@ void DetailTransaction::setTransaction(const TransactionData &data)
 
     // 3. 날짜 & 금액
     dateLabel->setText(data.dateTime);
-    amountLabel->setText(data.amount + "원");
+
+    QLocale locale = QLocale::system();
+    QString formattedAmount = locale.toString(data.amount.toLongLong());
+    amountLabel->setText(formattedAmount + "원");
 
     // 4. 거래유형 텍스트
     QString typeText = data.isExpense ? "출금" : "입금";
@@ -199,4 +202,3 @@ void DetailTransaction::onDeleteClicked()
         }
     }
 }
-
