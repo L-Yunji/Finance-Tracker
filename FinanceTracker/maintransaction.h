@@ -35,7 +35,6 @@ private:
     QPushButton *exportBtn;
 
     QLabel *listHistoryTitle;
-    //QPushButton *filterBtn;
     QToolButton *filterBtn;
     QString currentFilter;
 
@@ -48,6 +47,7 @@ private:
     QScrollArea *scrollArea;
     QWidget *scrollContent;
     QVBoxLayout *historyListLayout;
+    QLabel *emptyMessageLabel;
 
     void loadTransactionHistory();
     void updateCurrentBalance();
