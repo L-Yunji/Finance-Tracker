@@ -7,7 +7,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollArea>
-#include "detailtransaction.h"
 #include "TransactionData.h"
 #include <QToolButton>
 #include <QMenu>

@@ -30,6 +30,11 @@ private:
     QPushButton *updateBtn;
     QPushButton *deleteBtn;
 
+private:
+    QPushButton* categoryDropdownBtn;
+    QMenu* categoryMenu;
+    QString selectedCategory;
+
     void setupUI();
 
 private slots:
