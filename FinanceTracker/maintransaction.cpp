@@ -35,8 +35,8 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     // 버튼 두 개
     QHBoxLayout *btnLayout = new QHBoxLayout();
-    getBtn = new QPushButton("가져오기");
-    sendBtn = new QPushButton("보내기");
+    getBtn = new QPushButton("수입");
+    sendBtn = new QPushButton("지출");
     getBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;

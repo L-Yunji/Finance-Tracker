@@ -25,6 +25,8 @@ AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
     setupUI();
     setupKeyboard();
 
+    connect(backBtn, &QPushButton::clicked, this, &AddTransaction::close);
+
     setWindowTitle("키패드 입력");
     setFixedSize(360, 640);
     setContentsMargins(32, 0, 32, 32);
@@ -55,13 +57,27 @@ void AddTransaction::setupUI()
 
     backBtn = new QPushButton("←");
     backBtn->setFixedSize(40, 40);
-    backBtn->setStyleSheet("font-size: 20px; background: transparent; border: none;");
-
-    QString titleText = expenseFlag ? "보내기" : "가져오기";
+    backBtn->setStyleSheet(R"(
+    QPushButton {
+        background-color: #D5D6DA;      /* 밝은 그레이 배경 */
+        border: none;
+        border-radius: 16px;            /* 원형에 가까운 둥근 모서리 */
+        font-size: 20px;                /* 글자 크기 조정 */
+        color: #030303;                 /* 텍스트 색상 */
+    }
+    QPushButton:hover {
+        background-color: #e0e0e0;
+    }
+    QPushButton:pressed {
+        background-color: #d0d0d0;
+    }
+)");
+    QString titleText = expenseFlag ? "지출" : "수입";
     getSendHeader = new QLabel(titleText);
     getSendHeader->setAlignment(Qt::AlignCenter);
     QFont titleFont;
     titleFont.setPointSize(18);
+    titleFont.setWeight(QFont::Black);
     getSendHeader->setFont(titleFont);
 
     innerHeaderLayout->addWidget(backBtn, 0, 0, Qt::AlignLeft);
