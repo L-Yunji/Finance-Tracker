@@ -174,23 +174,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     scrollArea->setWidget(scrollContent);
     mainLayout->addWidget(scrollArea);
 
-    TransactionData sample1;
-    sample1.amount = "12000";
-    sample1.category = "식비";
-    sample1.dateTime = "2025-04-14 11:30";
-    sample1.memo = "편의점";
-    sample1.isExpense = true;
-
-    TransactionData sample2;
-    sample2.amount = "500000";
-    sample2.category = "월급";
-    sample2.dateTime = "2025-04-13 09:00";
-    sample2.memo = "4월 급여";
-    sample2.isExpense = false;
-
-    TransactionStore::allTransactions.append(sample1);
-    TransactionStore::allTransactions.append(sample2);
-
+    currentFilter = "전체";
     loadTransactionHistory();
     setCentralWidget(centralWidget);
 }
