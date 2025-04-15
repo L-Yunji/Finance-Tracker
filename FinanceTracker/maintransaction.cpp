@@ -185,15 +185,25 @@ MainTransaction::MainTransaction(QWidget *parent)
     mainLayout->addLayout(headerLayout);
 
     QScrollArea *scrollArea = new QScrollArea;
-    scrollArea->setFixedHeight(360);
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
 
     QWidget *scrollContent = new QWidget;
-    historyListLayout = new QVBoxLayout(scrollContent);
-    historyListLayout->setAlignment(Qt::AlignTop);
-    historyListLayout->setSpacing(8);
-    historyListLayout->setContentsMargins(0, 0, 0, 0);
+    QVBoxLayout *scrollLayout = new QVBoxLayout(scrollContent);
+    scrollLayout->setAlignment(Qt::AlignTop);
+    scrollLayout->setSpacing(8);
+    scrollLayout->setContentsMargins(0, 0, 0, 0);
+
+    emptyMessageLabel = new QLabel("거래내역을 입력해주세요", scrollContent);
+    emptyMessageLabel->setAlignment(Qt::AlignCenter);
+    emptyMessageLabel->setStyleSheet("font-size: 14px; color: #888888; padding-top: 80px;");
+    emptyMessageLabel->setVisible(false);
+    scrollLayout->addWidget(emptyMessageLabel);
+
+    historyListLayout = new QVBoxLayout();
+    scrollLayout->addLayout(historyListLayout);
+
+    scrollContent->setLayout(scrollLayout);
     scrollArea->setWidget(scrollContent);
     mainLayout->addWidget(scrollArea);
 
@@ -228,14 +238,21 @@ void MainTransaction::loadTransactionHistory()
         delete child;
     }
 
+    int count = 0;
     for (const TransactionData &data : TransactionStore::allTransactions) {
         if (currentFilter == "전체" ||
             (currentFilter == "입금" && !data.isExpense) ||
             (currentFilter == "출금" && data.isExpense)) {
             historyListLayout->addWidget(createHistoryItem(data));
+            count++;
         }
     }
 
+    if (count == 0) {
+        emptyMessageLabel->show();
+    } else {
+        emptyMessageLabel->hide();
+    }
 }
 
 QWidget* MainTransaction::createHistoryItem(const TransactionData &data)
