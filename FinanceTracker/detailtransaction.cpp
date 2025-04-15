@@ -112,7 +112,6 @@ void DetailTransaction::setupUI()
             font-weight: bold;
             font-size: 16px;
             border-radius: 10px;
-            cursor: pointer;
         }
         QPushButton:hover {
             background-color: #1517D5;
@@ -130,7 +129,6 @@ void DetailTransaction::setupUI()
             font-size: 16px;
             font-weight: bold;
             border-radius: 10px;
-            cursor: pointer;
         }
         QPushButton:hover {
             background-color: #030303;

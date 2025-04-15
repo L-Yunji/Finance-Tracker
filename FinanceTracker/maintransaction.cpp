@@ -44,7 +44,6 @@ MainTransaction::MainTransaction(QWidget *parent)
         border: none;
         border-radius: 12px;
         padding: 10px 20px;
-        cursor: pointer;
     }
     QPushButton:hover {
         background-color: #cddfff;
@@ -60,7 +59,6 @@ MainTransaction::MainTransaction(QWidget *parent)
         border: none;
         border-radius: 12px;
         padding: 10px 20px;
-        cursor: pointer;
     }
     QPushButton:hover {
         background-color: #cddfff;
