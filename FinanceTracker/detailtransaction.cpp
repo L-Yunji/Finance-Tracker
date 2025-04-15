@@ -22,13 +22,25 @@ void DetailTransaction::setupUI()
     // 1. 카테고리
     categoryComboBox = new QComboBox(this);
     categoryComboBox->addItems({"월급", "용돈", "기타"});
-    categoryComboBox->setStyleSheet("font-size: 18px; font-weight: bold;");
+    categoryComboBox->setStyleSheet(R"(
+        QComboBox {
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            background-color: transparent;
+        }
+    )");
     mainLayout->addWidget(categoryComboBox);
 
     // 2. 메모 입력창
     memoEdit = new QLineEdit(this);
     memoEdit->setPlaceholderText("메모 입력");
-    memoEdit->setStyleSheet("font-size: 14px;");
+    memoEdit->setStyleSheet(R"(
+        QLineEdit {
+            font-size: 12px;
+            border: none;
+        }
+    )");
     mainLayout->addWidget(memoEdit);
 
     // 3. 구분선
@@ -37,57 +49,89 @@ void DetailTransaction::setupUI()
     line->setFrameShadow(QFrame::Sunken);
     mainLayout->addWidget(line);
 
-    // 4. 날짜 / 금액 / 계좌 잔액
-    QVBoxLayout *infoLayout = new QVBoxLayout;
-    infoLayout->setAlignment(Qt::AlignTop);
+    // 4. 정보 레이아웃 (거래 일시, 금액, 유형)
+    QVBoxLayout *detailLayout = new QVBoxLayout;
+    detailLayout->setAlignment(Qt::AlignTop);
 
-    dateLabel = new QLabel("", this);
-    amountLabel = new QLabel("", this);
-    balanceLabel = new QLabel("", this);
+    QFont labelFont;
+    labelFont.setPointSize(12);
+    QString labelStyle = "color: #4F4F4F; font-size: 12px;";
 
-    QFont infoFont;
-    infoFont.setPointSize(14);
-    dateLabel->setFont(infoFont);
-    amountLabel->setFont(infoFont);
-    balanceLabel->setFont(infoFont);
+    QLabel *labelDateTitle = new QLabel("거래 일시:");
+    labelDateTitle->setStyleSheet(labelStyle);
+    labelDateTitle->setFont(labelFont);
 
-    infoLayout->addWidget(dateLabel);
-    infoLayout->addWidget(amountLabel);
-    infoLayout->addWidget(balanceLabel);
+    dateLabel = new QLabel("");
+    dateLabel->setStyleSheet(labelStyle);
+    dateLabel->setFont(labelFont);
 
-    mainLayout->addLayout(infoLayout);
+    QHBoxLayout *dateLayout = new QHBoxLayout;
+    dateLayout->addWidget(labelDateTitle);
+    dateLayout->addStretch();
+    dateLayout->addWidget(dateLabel);
+    detailLayout->addLayout(dateLayout);
+
+    QLabel *labelAmountTitle = new QLabel("거래 금액:");
+    labelAmountTitle->setStyleSheet(labelStyle);
+    labelAmountTitle->setFont(labelFont);
+
+    amountLabel = new QLabel("");
+    amountLabel->setStyleSheet(labelStyle);
+    amountLabel->setFont(labelFont);
+
+    QHBoxLayout *amountLayout = new QHBoxLayout;
+    amountLayout->addWidget(labelAmountTitle);
+    amountLayout->addStretch();
+    amountLayout->addWidget(amountLabel);
+    detailLayout->addLayout(amountLayout);
+
+    QLabel *labelTypeTitle = new QLabel("거래 유형:");
+    labelTypeTitle->setStyleSheet(labelStyle);
+    labelTypeTitle->setFont(labelFont);
+
+    balanceLabel = new QLabel("");
+    balanceLabel->setTextFormat(Qt::RichText);
+    balanceLabel->setFont(labelFont);
+
+    QHBoxLayout *typeLayout = new QHBoxLayout;
+    typeLayout->addWidget(labelTypeTitle);
+    typeLayout->addStretch();
+    typeLayout->addWidget(balanceLabel);
+    detailLayout->addLayout(typeLayout);
+
+    mainLayout->addLayout(detailLayout);
 
     // 5. 버튼
     updateBtn = new QPushButton("수정하기", this);
     updateBtn->setStyleSheet(R"(
-    QPushButton {
-        background-color: #B3D5FF;
-        color: #1E40FF;
-        font-weight: bold;
-        font-size: 16px;
-        border-radius: 10px;
-    }
-    QPushButton:hover {
-        background-color: #1517D5;
-        color: white;
-    }
-)");
+        QPushButton {
+            background-color: #B3D5FF;
+            color: #1E40FF;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+        QPushButton:hover {
+            background-color: #1517D5;
+            color: white;
+        }
+    )");
     updateBtn->setFixedHeight(45);
 
     deleteBtn = new QPushButton("삭제하기", this);
     deleteBtn->setStyleSheet(R"(
-    QPushButton {
-        background-color: #D5D6DA;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-    QPushButton:hover {
-        background-color: #030303;
-        color: white;
-    }
-)");
+        QPushButton {
+            background-color: #D5D6DA;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        QPushButton:hover {
+            background-color: #030303;
+            color: white;
+        }
+    )");
     deleteBtn->setFixedHeight(45);
 
     mainLayout->addWidget(updateBtn);
@@ -99,8 +143,14 @@ void DetailTransaction::setTransaction(const TransactionData &data)
     categoryComboBox->setCurrentText(data.category);
     memoEdit->setText(data.memo);
 
-    dateLabel->setText("거래 일시: " + data.dateTime);
-    amountLabel->setText("거래금액: " + data.amount + "원");
-    balanceLabel->setText(data.isExpense ? "출금" : "입금");
-    balanceLabel->setStyleSheet(data.isExpense ? "color: #1E40FF; font-weight: bold;" : "color: #E53935; font-weight: bold;");
+    dateLabel->setText(data.dateTime);
+    amountLabel->setText(data.amount + "원");
+
+    QString typeText = data.isExpense ? "출금" : "입금";
+    QString typeColor = data.isExpense ? "#1E40FF" : "#E53935";
+
+    balanceLabel->setText(
+        "<span style='color:" + typeColor + "; font-size:12px; font-weight: bold;'>"
+        + typeText + "</span>");
 }
+
