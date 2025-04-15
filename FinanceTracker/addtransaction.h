@@ -29,6 +29,12 @@ private:
     QComboBox *categoryComboBox;
     QPushButton *continueButton;
 
+private:
+    QPushButton *categoryDropdownBtn;
+    QMenu *categoryMenu;
+    QString selectedCategory;
+
+
     // Keyboard buttons
     QPushButton *Btn1;
     QPushButton *Btn2;
