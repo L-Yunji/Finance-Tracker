@@ -16,6 +16,7 @@
 #include <QMap>
 #include <QDebug>
 #include <QImageReader>
+#include <QFileDialog>
 
 class MainTransaction : public QMainWindow
 {
@@ -31,6 +32,7 @@ private:
 
     QPushButton *getBtn;
     QPushButton *sendBtn;
+    QPushButton *exportBtn;
 
     QLabel *listHistoryTitle;
     //QPushButton *filterBtn;
@@ -58,7 +60,7 @@ private:
 
 public slots:
     void refreshTransactionList();
-
+    void exportToCSV();
     void filterAll();
     void filterDeposit();
     void filterWithdrawal();

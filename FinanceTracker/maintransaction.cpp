@@ -22,6 +22,28 @@ MainTransaction::MainTransaction(QWidget *parent)
     layoutBalanceSection->setContentsMargins(5, 5, 5, 5);
     layoutBalanceSection->setSpacing(0);
 
+    QHBoxLayout *topRow = new QHBoxLayout();
+    topRow->addStretch();
+
+    exportBtn = new QPushButton("내보내기");
+    exportBtn->setFixedHeight(30);
+    exportBtn->setStyleSheet(R"(
+    QPushButton {
+        background-color: #E0E0E0;
+        border: none;
+        border-radius: 12px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: bold;
+        color: #333;
+    }
+    QPushButton:hover {
+        background-color: #D0D0D0;
+    }
+)");
+    topRow->addWidget(exportBtn);
+    layoutBalanceSection->addLayout(topRow);
+
     curMoneyTitle = new QLabel("현재 잔액");
     curMoneyTitle->setStyleSheet("font-size: 18px;");
     curMoneyTitle->setFixedHeight(38);
@@ -33,6 +55,8 @@ MainTransaction::MainTransaction(QWidget *parent)
     layoutBalanceSection->addWidget(curMoneyTitle);
     layoutBalanceSection->addWidget(curMoney);
     mainLayout->addLayout(layoutBalanceSection);
+
+    connect(exportBtn, &QPushButton::clicked, this, &MainTransaction::exportToCSV);
 
     QHBoxLayout *btnLayout = new QHBoxLayout();
     getBtn = new QPushButton("수입");
@@ -337,6 +361,36 @@ bool MainTransaction::eventFilter(QObject *watched, QEvent *event)
         }
     }
     return QMainWindow::eventFilter(watched, event);
+}
+
+void MainTransaction::exportToCSV()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "CSV 파일로 저장", "transactions.csv", "CSV Files (*.csv)");
+
+    if (fileName.isEmpty())
+        return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, "오류", "파일을 열 수 없습니다.");
+        return;
+    }
+
+    QTextStream out(&file);
+
+    out << "날짜,카테고리,타입,금액\n";
+
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        QString type = data.isExpense ? "출금" : "입금";
+        out << QString("%1,%2,%3,%4\n")
+                   .arg(data.dateTime)
+                   .arg(data.category)
+                   .arg(type)
+                   .arg(data.amount);
+    }
+
+    file.close();
+    QMessageBox::information(this, "완료", "CSV 파일로 내보내기가 완료되었습니다.");
 }
 
 MainTransaction::~MainTransaction() {}
