@@ -292,6 +292,81 @@ void AddTransaction::handleContinueClicked()
     rawAmount.remove(QRegularExpression("[₩,\\s]"));
     long long inputAmount = rawAmount.toLongLong();
 
+    // Category가 비었는 지 확인하기
+    if (selectedCategory.isEmpty()) {
+        QDialog *dialog = new QDialog(this);
+        dialog->setFixedSize(300, 180);
+        dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);  // 테두리 유지
+
+        dialog->setStyleSheet(R"(
+        QDialog {
+            background-color: #ffffff;
+            border: 1px solid #E0E0E0;
+            border-radius: 16px;
+        }
+
+        QLabel#Title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2C2C2C;
+        }
+
+        QLabel#Message {
+            font-size: 14px;
+            color: #555555;
+            padding: 0 20px;
+        }
+
+        QPushButton {
+            background-color: #FF5E5E;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        QPushButton:hover {
+            background-color: #E14C4C;
+        }
+
+        QPushButton:pressed {
+            background-color: #B73838;
+        }
+    )");
+
+        QVBoxLayout *layout = new QVBoxLayout(dialog);
+        layout->setContentsMargins(20, 20, 20, 20);
+        layout->setSpacing(12);
+
+        QLabel *title = new QLabel("Warning!", dialog);
+        title->setObjectName("Title");
+        title->setAlignment(Qt::AlignCenter);
+
+        QLabel *message = new QLabel("카테고리를 선택해주세요.", dialog);
+        message->setObjectName("Message");
+        message->setAlignment(Qt::AlignCenter);
+
+        QPushButton *okButton = new QPushButton("확인", dialog);
+        okButton->setCursor(Qt::PointingHandCursor);
+        okButton->setFixedWidth(100);
+        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
+
+        QHBoxLayout *btnLayout = new QHBoxLayout;
+        btnLayout->addStretch();
+        btnLayout->addWidget(okButton);
+        btnLayout->addStretch();
+
+        layout->addWidget(title);
+        layout->addWidget(message);
+        layout->addLayout(btnLayout);
+
+        dialog->exec();
+        return;
+    }
+
+
     // 예외처리: 0원 이상만 등록 가능
     if (inputAmount == 0) {
         QDialog *dialog = new QDialog(this);
