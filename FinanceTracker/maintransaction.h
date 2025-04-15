@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollArea>
+#include "detailtransaction.h"
+#include "TransactionData.h"
 #include <QToolButton>
 #include <QMenu>
 #include <QString>
@@ -57,6 +59,7 @@ private:
         const QString &amount,
         const QColor &typeColor
         );
+
 
 public slots:
     void refreshTransactionList();

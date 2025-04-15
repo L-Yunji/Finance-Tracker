@@ -1,6 +1,11 @@
 #include "maintransaction.h"
 #include "TransactionStore.h"
 #include "addtransaction.h"
+#include "detailtransaction.h"
+#include <QMouseEvent>
+#include <QVariant>
+#include <QToolButton>
+#include <QMenu>
 
 MainTransaction::MainTransaction(QWidget *parent)
     : QMainWindow(parent)
@@ -35,8 +40,10 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     // 버튼 두 개
     QHBoxLayout *btnLayout = new QHBoxLayout();
-    getBtn = new QPushButton("가져오기");
-    sendBtn = new QPushButton("보내기");
+    getBtn = new QPushButton("수입");
+    sendBtn = new QPushButton("지출");
+    getBtn->setCursor(Qt::PointingHandCursor);
+    sendBtn->setCursor(Qt::PointingHandCursor);
     getBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;
@@ -96,7 +103,8 @@ MainTransaction::MainTransaction(QWidget *parent)
     filterBtn = new QToolButton(this);
     filterBtn->setText("전체");
     filterBtn->setPopupMode(QToolButton::InstantPopup);
-    // 2. 드롭다운 메뉴(QMenu) 스타일 적용 및 효과
+    filterBtn->setCursor(Qt::PointingHandCursor);
+
     QMenu *filterMenu = new QMenu(filterBtn);
     filterMenu->setStyleSheet(R"(
     QMenu {
@@ -123,14 +131,12 @@ MainTransaction::MainTransaction(QWidget *parent)
         background: #D5D6DA;
         margin: 4px 0;
     }
-)");
+    )");
 
-    // 3. 메뉴가 표시되기 전, 버튼의 width와 동일하게 QMenu의 width 조정
     connect(filterMenu, &QMenu::aboutToShow, [=]() {
         filterMenu->setFixedWidth(filterBtn->width());
     });
 
-    // 메뉴 액션 추가
     filterMenu->addAction("전체", this, &MainTransaction::filterAll);
     filterMenu->addAction("입금", this, &MainTransaction::filterDeposit);
     filterMenu->addAction("출금", this, &MainTransaction::filterWithdrawal);
@@ -187,146 +193,10 @@ MainTransaction::MainTransaction(QWidget *parent)
     mainLayout->addWidget(scrollArea);
 
     currentFilter = "전체";
-    // 저장된 거래 내역 불러오기
     loadTransactionHistory();
-    updateCurrentBalance();
-    // 중앙 위젯 세팅
     setCentralWidget(centralWidget);
 }
 
-QWidget* MainTransaction::createHistoryItem(
-    const QString &date,
-    const QString &category,
-    const QString &type,
-    const QString &amount,
-    const QColor &typeColor
-    )
-{
-    // 기본 위젯 및 메인 레이아웃 생성
-    QWidget *itemWidget = new QWidget;
-    itemWidget->setFixedHeight(64);
-    QHBoxLayout *layout = new QHBoxLayout(itemWidget);
-    layout->setContentsMargins(8, 8, 8, 8);
-    layout->setSpacing(10);
-
-    // 왼쪽 영역: 아이콘 및 날짜/카테고리 텍스트 영역을 포함하는 수평 레이아웃
-    QHBoxLayout *leftLayout = new QHBoxLayout;
-    leftLayout->setContentsMargins(0,0,0,0);
-    leftLayout->setSpacing(12);
-
-    // 1. 아이콘 레이블 (가장 왼쪽)
-    QLabel *iconLabel = new QLabel;
-    iconLabel->setFixedSize(40,40);
-    static QMap<QString, QString> categoryIconMap = {
-        { "식비",    "food.png" },
-        { "교통",    "transport.png" },
-        { "쇼핑",    "shopping.png" },
-        { "월급",    "salary.png" },
-        { "용돈",    "allowance.png" },
-        { "기타",    "default.png" }
-    };
-
-    QPixmap iconPixmap;
-    if (categoryIconMap.contains(category))
-        iconPixmap = QPixmap(categoryIconMap.value(category));
-    else
-        iconPixmap = QPixmap(":/icons/icons/default.png");
-
-    if (!iconPixmap.isNull()) {
-        iconLabel->setPixmap(iconPixmap.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    }
-
-    // iconPixmap = QPixmap("default.png");
-    // iconLabel->setPixmap(iconPixmap);
-    leftLayout->addWidget(iconLabel);
-
-    // 2. 날짜와 카테고리 텍스트를 위한 수직 레이아웃
-    QVBoxLayout *textLayout = new QVBoxLayout;
-    textLayout->setSpacing(2);
-    textLayout->setContentsMargins(0, 0, 0, 0);
-
-    QLabel *dateLabel = new QLabel(date);
-    dateLabel->setStyleSheet("font-size: 12px; color: gray;");
-    textLayout->addWidget(dateLabel);
-
-    QLabel *categoryLabel = new QLabel(category);
-    categoryLabel->setStyleSheet("font-size: 14px; font-weight: bold; color: #030303;");
-    textLayout->addWidget(categoryLabel);
-
-    leftLayout->addLayout(textLayout);
-    layout->addLayout(leftLayout);
-
-    // 오른쪽 영역: 거래 유형 및 금액 표시 (수직 레이아웃)
-    QVBoxLayout *rightLayout = new QVBoxLayout;
-    rightLayout->setContentsMargins(0,0,0,0);
-    rightLayout->setSpacing(0);
-    rightLayout->setAlignment(Qt::AlignRight);
-
-    QLabel *typeLabel = new QLabel(type);
-    typeLabel->setStyleSheet(QString("font-size: 12px; font-weight: bold; color: %1;")
-                                 .arg(typeColor.name()));
-    typeLabel->setAlignment(Qt::AlignRight);
-    rightLayout->addWidget(typeLabel);
-
-    QLabel *amountLabel = new QLabel(amount);
-    amountLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
-    amountLabel->setAlignment(Qt::AlignRight);
-    rightLayout->addWidget(amountLabel);
-
-    layout->addStretch(); // 좌측과 우측 영역 사이에 여백
-    layout->addLayout(rightLayout);
-
-    return itemWidget;
-}
-
-void MainTransaction::loadTransactionHistory()
-{
-    // 기존 리스트 정리
-    QLayoutItem *child;
-    while ((child = historyListLayout->takeAt(0)) != nullptr) {
-        if (child->widget()) delete child->widget();
-        delete child;
-    }
-
-    // 저장된 거래 내역 모두 출력
-    for (const TransactionData &data : TransactionStore::allTransactions) {
-        if (currentFilter == "전체" ||
-            (currentFilter == "입금" && !data.isExpense) ||
-            (currentFilter == "출금" && data.isExpense)) {
-
-            QString type = data.isExpense ? "출금" : "입금";
-            QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
-
-            QWidget *item = createHistoryItem(
-                data.dateTime,
-                data.category,
-                type,
-                data.amount + "원",
-                color
-                );
-            historyListLayout->addWidget(item);
-        }
-    }
-}
-void MainTransaction::updateCurrentBalance()
-{
-    long long total = 0;
-    for (const TransactionData &data : TransactionStore::allTransactions) {
-        long long amount = data.amount.toLongLong();
-        total += data.isExpense ? -amount : amount;
-    }
-
-    QLocale locale = QLocale::system();
-    QString formatted = locale.toString(total);
-    curMoney->setText("₩" + formatted);
-}
-
-void MainTransaction::refreshTransactionList() {
-    loadTransactionHistory();
-    updateCurrentBalance();
-}
-
-// 새로 추가: 필터 관련 슬롯 구현
 void MainTransaction::filterAll() {
     currentFilter = "전체";
     filterBtn->setText("전체");
@@ -345,8 +215,133 @@ void MainTransaction::filterWithdrawal() {
     refreshTransactionList();
 }
 
+void MainTransaction::loadTransactionHistory()
+{
+    // 기존 리스트 정리
+    QLayoutItem *child;
+    while ((child = historyListLayout->takeAt(0)) != nullptr) {
+        if (child->widget()) delete child->widget();
+        delete child;
+    }
+
+    // 저장된 거래 내역 모두 출력
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        if (currentFilter == "전체" ||
+            (currentFilter == "입금" && !data.isExpense) ||
+            (currentFilter == "출금" && data.isExpense)) {
+            historyListLayout->addWidget(createHistoryItem(data));
+        }
+    }
+
+}
+
+QWidget* MainTransaction::createHistoryItem(const TransactionData &data)
+{
+    QWidget *itemWidget = new QWidget;
+    itemWidget->setFixedHeight(64);
+    itemWidget->setCursor(Qt::PointingHandCursor);
+
+    // 🔹 클릭 이벤트 처리를 위한 정보 저장
+    itemWidget->setProperty("transaction", QVariant::fromValue(data));
+    itemWidget->installEventFilter(this);
+
+    QHBoxLayout *layout = new QHBoxLayout(itemWidget);
+    layout->setContentsMargins(8, 8, 8, 8);
+    layout->setSpacing(10);
+
+    // 🔸 왼쪽 레이아웃: 아이콘 + 날짜 + 카테고리
+    QHBoxLayout *leftLayout = new QHBoxLayout;
+    leftLayout->setSpacing(12);
+
+    QLabel *iconLabel = new QLabel;
+    iconLabel->setFixedSize(40, 40);
+
+    static QMap<QString, QString> categoryIconMap = {
+        { "식비",    "food.png" },
+        { "교통",    "transport.png" },
+        { "쇼핑",    "shopping.png" },
+        { "월급",    "salary.png" },
+        { "용돈",    "allowance.png" },
+        { "기타",    "default.png" }
+    };
+
+    QPixmap iconPixmap;
+    if (categoryIconMap.contains(data.category)) {
+        iconPixmap = QPixmap(categoryIconMap.value(data.category));
+    } else {
+        iconPixmap = QPixmap(":/icons/icons/default.png");
+    }
+
+    if (!iconPixmap.isNull()) {
+        iconLabel->setPixmap(iconPixmap.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+
+    leftLayout->addWidget(iconLabel);
+
+    QVBoxLayout *textLayout = new QVBoxLayout;
+    textLayout->setSpacing(2);
+
+    QLabel *dateLabel = new QLabel(data.dateTime);
+    dateLabel->setStyleSheet("font-size: 12px; color: gray;");
+    textLayout->addWidget(dateLabel);
+
+    QLabel *categoryLabel = new QLabel(data.category);
+    categoryLabel->setStyleSheet("font-size: 14px; font-weight: bold; color: #030303;");
+    textLayout->addWidget(categoryLabel);
+
+    leftLayout->addLayout(textLayout);
+    layout->addLayout(leftLayout);
+
+    // 🔸 오른쪽 레이아웃: 출금/입금 + 금액
+    QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->setSpacing(0);
+    rightLayout->setAlignment(Qt::AlignRight);
+
+    QString typeText = data.isExpense ? "출금" : "입금";
+    QColor typeColor = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
+
+    QLabel *typeLabel = new QLabel(typeText);
+    typeLabel->setStyleSheet(QString("font-size: 12px; font-weight: bold; color: %1;").arg(typeColor.name()));
+    typeLabel->setAlignment(Qt::AlignRight);
+    rightLayout->addWidget(typeLabel);
+
+    QLabel *amountLabel = new QLabel(data.amount + "원");
+    amountLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
+    amountLabel->setAlignment(Qt::AlignRight);
+    rightLayout->addWidget(amountLabel);
+
+    layout->addStretch();
+    layout->addLayout(rightLayout);
+
+    return itemWidget;
+}
 
 
-MainTransaction::~MainTransaction() {
+void MainTransaction::updateCurrentBalance()
+{
+    long long total = 0;
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        long long amount = data.amount.toLongLong();
+        total += data.isExpense ? -amount : amount;
+    }
 
+    QLocale locale = QLocale::system();
+    QString formatted = locale.toString(total);
+    curMoney->setText("₩" + formatted);
+}
+
+void MainTransaction::refreshTransactionList() {
+    loadTransactionHistory();
+    updateCurrentBalance();
+}
+
+void MainTransaction::showDetailWindow(const TransactionData &data)
+{
+    DetailTransaction *dtWin = new DetailTransaction();
+    dtWin->setTransaction(data);
+    dtWin->setAttribute(Qt::WA_DeleteOnClose);
+    dtWin->move(this->x() + 30, this->y() + 30);
+    dtWin->show();
+    connect(dtWin, &DetailTransaction::transactionUpdated, this, &MainTransaction::refreshTransactionList);
+    connect(dtWin, &DetailTransaction::transactionDeleted, this, &MainTransaction::refreshTransactionList);
 }
