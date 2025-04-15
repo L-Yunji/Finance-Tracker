@@ -82,6 +82,7 @@ void SignupDialog::handleSignup() {
     }
 
     if (UserDBManager::registerUser(username, password)) {
+        showSuccessDialog("회원가입이 완료되었습니다.");
         accept();  // 성공 시 종료
     } else {
         showWarningDialog("이미 존재하는 아이디이거나 오류가 발생했습니다.");
@@ -135,6 +136,78 @@ void SignupDialog::showWarningDialog(const QString &message) {
     layout->setSpacing(12);
 
     QLabel *title = new QLabel("가입 실패", dialog);
+    title->setObjectName("Title");
+    title->setAlignment(Qt::AlignCenter);
+
+    QLabel *messageLabel = new QLabel(message, dialog);
+    messageLabel->setObjectName("Message");
+    messageLabel->setAlignment(Qt::AlignCenter);
+    messageLabel->setWordWrap(true);
+
+    QPushButton *okButton = new QPushButton("확인", dialog);
+    okButton->setCursor(Qt::PointingHandCursor);
+    okButton->setFixedWidth(100);
+    connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
+
+    QHBoxLayout *btnLayout = new QHBoxLayout;
+    btnLayout->addStretch();
+    btnLayout->addWidget(okButton);
+    btnLayout->addStretch();
+
+    layout->addWidget(title);
+    layout->addWidget(messageLabel);
+    layout->addLayout(btnLayout);
+
+    dialog->exec();
+}
+
+void SignupDialog::showSuccessDialog(const QString &message) {
+    QDialog *dialog = new QDialog(this);
+    dialog->setFixedSize(300, 180);
+    dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    dialog->setStyleSheet(R"(
+        QDialog {
+            background-color: #ffffff;
+            border: 1px solid #E0E0E0;
+            border-radius: 16px;
+        }
+
+        QLabel#Title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2C2C2C;
+        }
+
+        QLabel#Message {
+            font-size: 14px;
+            color: #555555;
+            padding: 0 20px;
+        }
+
+        QPushButton {
+            background-color: #66CC66;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        QPushButton:hover {
+            background-color: #52B152;
+        }
+
+        QPushButton:pressed {
+            background-color: #3A9E3A;
+        }
+    )");
+
+    QVBoxLayout *layout = new QVBoxLayout(dialog);
+    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(12);
+
+    QLabel *title = new QLabel("가입 성공", dialog);
     title->setObjectName("Title");
     title->setAlignment(Qt::AlignCenter);
 
