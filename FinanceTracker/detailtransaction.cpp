@@ -140,12 +140,23 @@ void DetailTransaction::setupUI()
 
 void DetailTransaction::setTransaction(const TransactionData &data)
 {
+    // 1. 출금/입금 여부에 따라 카테고리 항목 설정
+    categoryComboBox->clear();
+    if (data.isExpense) {
+        categoryComboBox->addItems({"식비", "교통", "쇼핑", "기타"});
+    } else {
+        categoryComboBox->addItems({"월급", "용돈", "기타"});
+    }
     categoryComboBox->setCurrentText(data.category);
+
+    // 2. 메모
     memoEdit->setText(data.memo);
 
+    // 3. 날짜 & 금액
     dateLabel->setText(data.dateTime);
     amountLabel->setText(data.amount + "원");
 
+    // 4. 거래유형 텍스트
     QString typeText = data.isExpense ? "출금" : "입금";
     QString typeColor = data.isExpense ? "#1E40FF" : "#E53935";
 
