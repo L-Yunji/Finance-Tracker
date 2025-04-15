@@ -59,34 +59,34 @@ void DetailTransaction::setupUI()
     // 5. 버튼
     updateBtn = new QPushButton("수정하기", this);
     updateBtn->setStyleSheet(R"(
-    QPushButton {
-        background-color: #B3D5FF;
-        color: #1E40FF;
-        font-weight: bold;
-        font-size: 16px;
-        border-radius: 10px;
-    }
-    QPushButton:hover {
-        background-color: #1517D5;
-        color: white;
-    }
-)");
+        QPushButton {
+            background-color: #B3D5FF;
+            color: #1E40FF;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+        QPushButton:hover {
+            background-color: #1517D5;
+            color: white;
+        }
+    )");
     updateBtn->setFixedHeight(45);
 
     deleteBtn = new QPushButton("삭제하기", this);
     deleteBtn->setStyleSheet(R"(
-    QPushButton {
-        background-color: #D5D6DA;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-    QPushButton:hover {
-        background-color: #030303;
-        color: white;
-    }
-)");
+        QPushButton {
+            background-color: #D5D6DA;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        QPushButton:hover {
+            background-color: #030303;
+            color: white;
+        }
+    )");
     deleteBtn->setFixedHeight(45);
 
     mainLayout->addWidget(updateBtn);
