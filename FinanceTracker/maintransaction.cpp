@@ -201,7 +201,7 @@ void MainTransaction::loadTransactionHistory()
     // 저장된 거래 내역 모두 출력
     for (const TransactionData &data : TransactionStore::allTransactions) {
         QString type = data.isExpense ? "출금" : "입금";
-        QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#3A9D23");
+        QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
 
         QWidget *item = createHistoryItem(
             data.dateTime,
