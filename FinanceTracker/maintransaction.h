@@ -52,6 +52,5 @@ private:
 public slots:
     void refreshTransactionList();
 
-
 };
 #endif // MAINTRANSACTION_H
