@@ -5,6 +5,7 @@
 #include <QMetaType>
 
 struct TransactionData {
+    int id = -1;        // 고유 ID (DB에서 받아옴)
     QString amount;     // 금액 (예: "25000")
     QString category;   // 카테고리 (예: "식비")
     QString dateTime;   // 시간 (예: "2024-04-14 18:00")
