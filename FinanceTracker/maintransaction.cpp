@@ -93,28 +93,70 @@ MainTransaction::MainTransaction(QWidget *parent)
     QHBoxLayout *headerLayout = new QHBoxLayout();
     listHistoryTitle = new QLabel("거래 내역");
     listHistoryTitle->setStyleSheet("font-size: 18px;");
-    filterBtn = new QToolButton();
+    filterBtn = new QToolButton(this);
     filterBtn->setText("전체");
     filterBtn->setPopupMode(QToolButton::InstantPopup);
+    // 2. 드롭다운 메뉴(QMenu) 스타일 적용 및 효과
     QMenu *filterMenu = new QMenu(filterBtn);
+    filterMenu->setStyleSheet(R"(
+    QMenu {
+        background-color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0;
+        margin: 0;
+    }
+    QMenu::item {
+        background-color: white;
+        color: #030303;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin: 2px;
+    }
+    QMenu::item:selected {
+        background-color: #B3D5FF;
+        color: white;
+    }
+    QMenu::separator {
+        height: 1px;
+        background: #D5D6DA;
+        margin: 4px 0;
+    }
+)");
+
+    // 3. 메뉴가 표시되기 전, 버튼의 width와 동일하게 QMenu의 width 조정
+    connect(filterMenu, &QMenu::aboutToShow, [=]() {
+        filterMenu->setFixedWidth(filterBtn->width());
+    });
+
+    // 메뉴 액션 추가
     filterMenu->addAction("전체", this, &MainTransaction::filterAll);
     filterMenu->addAction("입금", this, &MainTransaction::filterDeposit);
     filterMenu->addAction("출금", this, &MainTransaction::filterWithdrawal);
     filterBtn->setMenu(filterMenu);
 
-
     filterBtn->setStyleSheet(R"(
-    QPushButton {
-        background-color: white;
-        color: #333333;
-        border: 1px solid #D0D0D0;
+    QToolButton {
+        background-color: #D5D6DA;
+        border: none;
         border-radius: 12px;
+        padding: 8px 16px;
         font-size: 14px;
         font-weight: bold;
-        padding: 6px 12px;
+        color: #030303;
     }
-    QPushButton:hover {
-        background-color: #f0f0f0;
+    QToolButton:hover {
+        background-color: #B3D5FF;
+    }
+    QToolButton:pressed {
+        background-color: #000000;
+        color: white;
+    }
+    QToolButton::menu-indicator {
+        subcontrol-origin: padding;
+        subcontrol-position: center right;
+        image: none;
     }
 )");
 

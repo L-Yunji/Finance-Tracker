@@ -10,6 +10,7 @@
 #include <QToolButton>
 #include <QMenu>
 #include <QString>
+#include <QGraphicsDropShadowEffect>
 
 class MainTransaction : public QMainWindow
 {
