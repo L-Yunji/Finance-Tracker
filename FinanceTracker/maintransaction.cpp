@@ -285,7 +285,11 @@ QWidget* MainTransaction::createHistoryItem(const TransactionData &data)
     typeLabel->setAlignment(Qt::AlignRight);
     rightLayout->addWidget(typeLabel);
 
-    QLabel *amountLabel = new QLabel(data.amount + "원");
+    // 천 단위 쉼표 넣기
+    QLocale locale = QLocale::system();
+    QString formattedAmount = locale.toString(data.amount.toLongLong());
+
+    QLabel *amountLabel = new QLabel(formattedAmount + "원");
     amountLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
     amountLabel->setAlignment(Qt::AlignRight);
     rightLayout->addWidget(amountLabel);
