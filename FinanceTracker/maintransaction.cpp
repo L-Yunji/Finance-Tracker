@@ -14,14 +14,10 @@ MainTransaction::MainTransaction(QWidget *parent)
     setStyleSheet("background-color: white;");
     setWindowTitle("계좌 관리");
 
-    // 루트 위젯 & 레이아웃
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
+    mainLayout->setContentsMargins(32,32,32,32);
 
-    // 전체 여백 설정
-    mainLayout->setContentsMargins(32,32,32,32); // 화면 전체 패딩
-
-    // 현재 잔액 영역
     QVBoxLayout *layoutBalanceSection = new QVBoxLayout();
     layoutBalanceSection->setContentsMargins(5, 5, 5, 5);
     layoutBalanceSection->setSpacing(0);
@@ -32,13 +28,12 @@ MainTransaction::MainTransaction(QWidget *parent)
     curMoneyTitle->setContentsMargins(0, 0, 0, 0);
     curMoney = new QLabel("₩2,010,000");
     curMoney->setStyleSheet("font-size: 32px; font-weight: bold;");
-    curMoney->setFixedHeight(38);  // 너무 크지 않게 제한
+    curMoney->setFixedHeight(38);
 
     layoutBalanceSection->addWidget(curMoneyTitle);
     layoutBalanceSection->addWidget(curMoney);
     mainLayout->addLayout(layoutBalanceSection);
 
-    // 버튼 두 개
     QHBoxLayout *btnLayout = new QHBoxLayout();
     getBtn = new QPushButton("수입");
     sendBtn = new QPushButton("지출");
@@ -57,7 +52,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     QPushButton:hover {
         background-color: #cddfff;
     }
-)");
+    )");
 
     sendBtn->setStyleSheet(R"(
     QPushButton {
@@ -72,30 +67,25 @@ MainTransaction::MainTransaction(QWidget *parent)
     QPushButton:hover {
         background-color: #cddfff;
     }
-)");
+    )");
 
     btnLayout->addWidget(getBtn);
     btnLayout->addWidget(sendBtn);
     mainLayout->addLayout(btnLayout);
 
-    // sendBtn 클릭 시 AddTransaction 창 띄우기
     connect(sendBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction(true); // true = 출금
-
+        AddTransaction *addWin = new AddTransaction(true);
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
-
-        addWin->move(this->x() + 30, this->y() + 30);  // 약간 옆에 띄움
+        addWin->move(this->x() + 30, this->y() + 30);
         addWin->show();
     });
     connect(getBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction(false);  // false = 입금
+        AddTransaction *addWin = new AddTransaction(false);
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
         addWin->move(this->x() + 30, this->y() + 30);
         addWin->show();
     });
 
-
-    // 히스토리 헤더
     mainLayout->addSpacing(12);
     QHBoxLayout *headerLayout = new QHBoxLayout();
     listHistoryTitle = new QLabel("거래 내역");
@@ -164,32 +154,24 @@ MainTransaction::MainTransaction(QWidget *parent)
         subcontrol-position: center right;
         image: none;
     }
-)");
+    )");
 
     headerLayout->addWidget(listHistoryTitle);
     headerLayout->addStretch();
     headerLayout->addWidget(filterBtn);
     mainLayout->addLayout(headerLayout);
 
-    // 거래 리스트용 레이아웃 만들기
-    // 스크롤 영역 생성
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setFixedHeight(360);
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
 
-    // 내부 콘텐츠 위젯 + 레이아웃
     QWidget *scrollContent = new QWidget;
-
-    historyListLayout = new QVBoxLayout(scrollContent); // 멤버 변수로 초기화
+    historyListLayout = new QVBoxLayout(scrollContent);
     historyListLayout->setAlignment(Qt::AlignTop);
     historyListLayout->setSpacing(8);
     historyListLayout->setContentsMargins(0, 0, 0, 0);
-
-    // 연결
     scrollArea->setWidget(scrollContent);
-
-    // 스크롤 영역만 mainLayout에 추가!
     mainLayout->addWidget(scrollArea);
 
     currentFilter = "전체";
@@ -217,14 +199,12 @@ void MainTransaction::filterWithdrawal() {
 
 void MainTransaction::loadTransactionHistory()
 {
-    // 기존 리스트 정리
     QLayoutItem *child;
     while ((child = historyListLayout->takeAt(0)) != nullptr) {
         if (child->widget()) delete child->widget();
         delete child;
     }
 
-    // 저장된 거래 내역 모두 출력
     for (const TransactionData &data : TransactionStore::allTransactions) {
         if (currentFilter == "전체" ||
             (currentFilter == "입금" && !data.isExpense) ||
@@ -345,3 +325,18 @@ void MainTransaction::showDetailWindow(const TransactionData &data)
     connect(dtWin, &DetailTransaction::transactionUpdated, this, &MainTransaction::refreshTransactionList);
     connect(dtWin, &DetailTransaction::transactionDeleted, this, &MainTransaction::refreshTransactionList);
 }
+
+bool MainTransaction::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonRelease) {
+        QWidget *clickedWidget = qobject_cast<QWidget *>(watched);
+        if (clickedWidget && clickedWidget->property("transaction").isValid()) {
+            TransactionData data = clickedWidget->property("transaction").value<TransactionData>();
+            showDetailWindow(data);
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
+}
+
+MainTransaction::~MainTransaction() {}
