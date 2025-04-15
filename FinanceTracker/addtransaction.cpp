@@ -55,34 +55,31 @@ void AddTransaction::setupUI()
     innerHeaderLayout->setColumnStretch(1, 2);
     innerHeaderLayout->setColumnStretch(2, 1);
 
-    backBtn = new QPushButton("←");
-    backBtn->setFixedSize(40, 40);
+    backBtn = new QPushButton("뒤로");
     backBtn->setStyleSheet(R"(
     QPushButton {
-        background-color: #D5D6DA;      /* 밝은 그레이 배경 */
+        background-color: transparent;     /* 배경 투명 */
         border: none;
-        border-radius: 16px;            /* 원형에 가까운 둥근 모서리 */
-        font-size: 20px;                /* 글자 크기 조정 */
-        color: #030303;                 /* 텍스트 색상 */
-    }
-    QPushButton:hover {
-        background-color: #e0e0e0;
-    }
-    QPushButton:pressed {
-        background-color: #d0d0d0;
+        border-radius: 16px;
+        font-size: 12px;
+        color: #4F4F4F;
     }
 )");
+    backBtn->setCursor(Qt::PointingHandCursor);  // 커서 모양 손바닥으로 변경
+
     QString titleText = expenseFlag ? "지출" : "수입";
     getSendHeader = new QLabel(titleText);
     getSendHeader->setAlignment(Qt::AlignCenter);
     QFont titleFont;
-    titleFont.setPointSize(18);
+    titleFont.setPointSize(14);
     titleFont.setWeight(QFont::Black);
     getSendHeader->setFont(titleFont);
+    getSendHeader->setStyleSheet("color: #4F4F4F;");
 
     innerHeaderLayout->addWidget(backBtn, 0, 0, Qt::AlignLeft);
     innerHeaderLayout->addWidget(getSendHeader, 0, 1, Qt::AlignCenter);
     headerWidget->setLayout(innerHeaderLayout);
+
     headerLayout->addWidget(headerWidget);
     mainLayout->addLayout(headerLayout);
 
@@ -94,7 +91,7 @@ void AddTransaction::setupUI()
     font.setPointSize(32);
     font.setBold(true);
     displayLabel->setFont(font);
-    displayLabel->setStyleSheet("color: black");
+    displayLabel->setStyleSheet("color: #030303");
     displayLabel->setFixedHeight(70);
     mainLayout->addWidget(displayLabel);
     mainLayout->addSpacing(12);
@@ -150,7 +147,7 @@ void AddTransaction::setupUI()
     continueButton = new QPushButton("완료", this);
     continueButton->setStyleSheet(R"(
     QPushButton {
-        background-color: #151515;
+        background-color: #4F4F4F;
         color: white;
         font-size: 16px;
         font-weight: bold;
