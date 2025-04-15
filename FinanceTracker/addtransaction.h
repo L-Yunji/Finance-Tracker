@@ -15,8 +15,7 @@ class AddTransaction : public QWidget
     Q_OBJECT
 
 public:
-    explicit AddTransaction(QWidget *parent = nullptr);
-    explicit AddTransaction(bool isExpense = true, QWidget *parent = nullptr);
+    explicit AddTransaction(bool isExpense, const QString &username, QWidget *parent = nullptr);
     ~AddTransaction() override;
 
 private:
@@ -28,6 +27,7 @@ private:
     QLabel *getSendHeader;
     QComboBox *categoryComboBox;
     QPushButton *continueButton;
+    QString currentUsername;
 
     // Keyboard buttons
     QPushButton *Btn1;

@@ -14,6 +14,8 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
     setStyleSheet("background-color: white;");
     setWindowTitle("가계부");
 
+    TransactionStore::loadFromDB(username);
+
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
     mainLayout->setContentsMargins(32,32,32,32);
@@ -98,13 +100,13 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
     mainLayout->addLayout(btnLayout);
 
     connect(sendBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction(true);
+        AddTransaction *addWin = new AddTransaction(true, currentUsername);
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
         addWin->move(this->x() + 30, this->y() + 30);
         addWin->show();
     });
     connect(getBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction(false);
+        AddTransaction *addWin = new AddTransaction(false, currentUsername);
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
         addWin->move(this->x() + 30, this->y() + 30);
         addWin->show();

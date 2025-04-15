@@ -12,9 +12,10 @@
 #include <QLocale>
 #include <QComboBox>
 
-AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
+AddTransaction::AddTransaction(bool isExpense, const QString &username, QWidget *parent)
     : QWidget(parent),
     expenseFlag(isExpense),
+    currentUsername(username),
     displayLabel(nullptr),
     keyboardWidget(nullptr),
     keyboardLayout(nullptr),
@@ -24,13 +25,13 @@ AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
 {
     setupUI();
     setupKeyboard();
-
     connect(backBtn, &QPushButton::clicked, this, &AddTransaction::close);
-
     setWindowTitle("내역 입력");
     setFixedSize(360, 640);
     setContentsMargins(32, 0, 32, 32);
 }
+
+
 
 AddTransaction::~AddTransaction() {}
 
@@ -448,7 +449,7 @@ void AddTransaction::handleContinueClicked()
     data.dateTime = datetime;
     data.isExpense = expenseFlag;
 
-    TransactionStore::allTransactions.append(data);
+    TransactionStore::addTransaction(currentUsername, data);
 
     emit transactionAdded();
     this->close();
