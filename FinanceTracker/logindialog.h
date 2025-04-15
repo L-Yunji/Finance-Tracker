@@ -2,6 +2,7 @@
 #define LOGINDIALOG_H
 
 #include <QDialog>
+#include <QLabel>
 
 class QLineEdit;
 class QPushButton;
@@ -21,6 +22,8 @@ private slots:
 private:
     QLineEdit *usernameEdit;
     QLineEdit *passwordEdit;
+    QPushButton *loginButton;
+    QLabel *registerLabel;
 };
 
 #endif // LOGINDIALOG_H
