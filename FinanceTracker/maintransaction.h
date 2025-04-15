@@ -7,6 +7,13 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollArea>
+#include <QToolButton>
+#include <QMenu>
+#include <QString>
+#include <QGraphicsDropShadowEffect>
+#include <QMap>
+#include <QDebug>
+#include <QImageReader>
 
 class MainTransaction : public QMainWindow
 {
@@ -25,7 +32,9 @@ private:
     QPushButton *sendBtn;
 
     QLabel *listHistoryTitle;
-    QPushButton *filterBtn;
+    //QPushButton *filterBtn;
+    QToolButton *filterBtn;
+    QString currentFilter;
 
     QLabel *foodIc;
     QLabel *foodTitle;
@@ -51,6 +60,11 @@ private:
 
 public slots:
     void refreshTransactionList();
+
+    void filterAll();
+    void filterDeposit();
+    void filterWithdrawal();
+
 
 };
 #endif // MAINTRANSACTION_H
