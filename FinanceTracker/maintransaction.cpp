@@ -93,7 +93,15 @@ MainTransaction::MainTransaction(QWidget *parent)
     QHBoxLayout *headerLayout = new QHBoxLayout();
     listHistoryTitle = new QLabel("거래 내역");
     listHistoryTitle->setStyleSheet("font-size: 18px;");
-    filterBtn = new QPushButton("전체");
+    filterBtn = new QToolButton();
+    filterBtn->setText("전체");
+    filterBtn->setPopupMode(QToolButton::InstantPopup);
+    QMenu *filterMenu = new QMenu(filterBtn);
+    filterMenu->addAction("전체", this, &MainTransaction::filterAll);
+    filterMenu->addAction("입금", this, &MainTransaction::filterDeposit);
+    filterMenu->addAction("출금", this, &MainTransaction::filterWithdrawal);
+    filterBtn->setMenu(filterMenu);
+
 
     filterBtn->setStyleSheet(R"(
     QPushButton {
@@ -200,18 +208,22 @@ void MainTransaction::loadTransactionHistory()
 
     // 저장된 거래 내역 모두 출력
     for (const TransactionData &data : TransactionStore::allTransactions) {
-        QString type = data.isExpense ? "출금" : "입금";
-        QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
+        if (currentFilter == "전체" ||
+            (currentFilter == "입금" && !data.isExpense) ||
+            (currentFilter == "출금" && data.isExpense)) {
 
-        QWidget *item = createHistoryItem(
-            data.dateTime,
-            data.category,
-            type,
-            data.amount + "원",
-            color
-            );
+            QString type = data.isExpense ? "출금" : "입금";
+            QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
 
-        historyListLayout->addWidget(item);
+            QWidget *item = createHistoryItem(
+                data.dateTime,
+                data.category,
+                type,
+                data.amount + "원",
+                color
+                );
+            historyListLayout->addWidget(item);
+        }
     }
 }
 void MainTransaction::updateCurrentBalance()
@@ -232,6 +244,24 @@ void MainTransaction::refreshTransactionList() {
     updateCurrentBalance();
 }
 
+// 새로 추가: 필터 관련 슬롯 구현
+void MainTransaction::filterAll() {
+    currentFilter = "전체";
+    filterBtn->setText("전체");
+    refreshTransactionList();
+}
+
+void MainTransaction::filterDeposit() {
+    currentFilter = "입금";
+    filterBtn->setText("입금");
+    refreshTransactionList();
+}
+
+void MainTransaction::filterWithdrawal() {
+    currentFilter = "출금";
+    filterBtn->setText("출금");
+    refreshTransactionList();
+}
 
 
 
