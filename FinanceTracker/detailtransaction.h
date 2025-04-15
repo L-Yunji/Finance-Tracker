@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
+#include "TransactionData.h"
 
 class DetailTransaction : public QWidget
 {
@@ -13,6 +14,7 @@ class DetailTransaction : public QWidget
 
 public:
     explicit DetailTransaction(QWidget *parent = nullptr);
+    void setTransaction(const TransactionData &data);
 
 private:
     // 수정 가능한 필드

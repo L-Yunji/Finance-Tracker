@@ -1,4 +1,5 @@
 #include "detailtransaction.h"
+#include "TransactionData.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFrame>
@@ -36,16 +37,16 @@ void DetailTransaction::setupUI()
     line->setFrameShadow(QFrame::Sunken);
     mainLayout->addWidget(line);
 
-    // 4. 날짜 / 금액 / 타입(입금/출금)
+    // 4. 날짜 / 금액 / 계좌 잔액
     QVBoxLayout *infoLayout = new QVBoxLayout;
     infoLayout->setAlignment(Qt::AlignTop);
 
-    dateLabel = new QLabel("거래 일시: ", this);
-    amountLabel = new QLabel("거래 금액: ", this);
-    balanceLabel = new QLabel("계좌 잔액: ", this);
+    dateLabel = new QLabel("", this);
+    amountLabel = new QLabel("", this);
+    balanceLabel = new QLabel("", this);
 
     QFont infoFont;
-    infoFont.setPointSize(12);
+    infoFont.setPointSize(14);
     dateLabel->setFont(infoFont);
     amountLabel->setFont(infoFont);
     balanceLabel->setFont(infoFont);
@@ -91,4 +92,15 @@ void DetailTransaction::setupUI()
 
     mainLayout->addWidget(updateBtn);
     mainLayout->addWidget(deleteBtn);
+}
+
+void DetailTransaction::setTransaction(const TransactionData &data)
+{
+    categoryComboBox->setCurrentText(data.category);
+    memoEdit->setText(data.memo);
+
+    dateLabel->setText("거래 일시: " + data.dateTime);
+    amountLabel->setText("거래금액: " + data.amount + "원");
+    balanceLabel->setText(data.isExpense ? "출금" : "입금");
+    balanceLabel->setStyleSheet(data.isExpense ? "color: #1E40FF; font-weight: bold;" : "color: #E53935; font-weight: bold;");
 }
