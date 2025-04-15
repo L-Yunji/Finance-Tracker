@@ -225,44 +225,33 @@ void MainTransaction::loadTransactionHistory()
         if (currentFilter == "전체" ||
             (currentFilter == "입금" && !data.isExpense) ||
             (currentFilter == "출금" && data.isExpense)) {
-
-            QString type = data.isExpense ? "출금" : "입금";
-            QColor color = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
-
-            QWidget *item = createHistoryItem(
-                data.dateTime,
-                data.category,
-                type,
-                data.amount + "원",
-                color
-            );
-            historyListLayout->addWidget(item);
+            historyListLayout->addWidget(createHistoryItem(data));
         }
     }
+
 }
 
-QWidget* MainTransaction::createHistoryItem(
-    const QString &date,
-    const QString &category,
-    const QString &type,
-    const QString &amount,
-    const QColor &typeColor
-)
+QWidget* MainTransaction::createHistoryItem(const TransactionData &data)
 {
     QWidget *itemWidget = new QWidget;
     itemWidget->setFixedHeight(64);
     itemWidget->setCursor(Qt::PointingHandCursor);
 
+    // 🔹 클릭 이벤트 처리를 위한 정보 저장
+    itemWidget->setProperty("transaction", QVariant::fromValue(data));
+    itemWidget->installEventFilter(this);
+
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);
     layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(10);
 
+    // 🔸 왼쪽 레이아웃: 아이콘 + 날짜 + 카테고리
     QHBoxLayout *leftLayout = new QHBoxLayout;
-    leftLayout->setContentsMargins(0,0,0,0);
     leftLayout->setSpacing(12);
 
     QLabel *iconLabel = new QLabel;
-    iconLabel->setFixedSize(40,40);
+    iconLabel->setFixedSize(40, 40);
+
     static QMap<QString, QString> categoryIconMap = {
         { "식비",    "food.png" },
         { "교통",    "transport.png" },
@@ -273,42 +262,46 @@ QWidget* MainTransaction::createHistoryItem(
     };
 
     QPixmap iconPixmap;
-    if (categoryIconMap.contains(category))
-        iconPixmap = QPixmap(categoryIconMap.value(category));
-    else
+    if (categoryIconMap.contains(data.category)) {
+        iconPixmap = QPixmap(categoryIconMap.value(data.category));
+    } else {
         iconPixmap = QPixmap(":/icons/icons/default.png");
+    }
 
     if (!iconPixmap.isNull()) {
         iconLabel->setPixmap(iconPixmap.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
+
     leftLayout->addWidget(iconLabel);
 
     QVBoxLayout *textLayout = new QVBoxLayout;
     textLayout->setSpacing(2);
-    textLayout->setContentsMargins(0, 0, 0, 0);
 
-    QLabel *dateLabel = new QLabel(date);
+    QLabel *dateLabel = new QLabel(data.dateTime);
     dateLabel->setStyleSheet("font-size: 12px; color: gray;");
     textLayout->addWidget(dateLabel);
 
-    QLabel *categoryLabel = new QLabel(category);
+    QLabel *categoryLabel = new QLabel(data.category);
     categoryLabel->setStyleSheet("font-size: 14px; font-weight: bold; color: #030303;");
     textLayout->addWidget(categoryLabel);
 
     leftLayout->addLayout(textLayout);
     layout->addLayout(leftLayout);
 
+    // 🔸 오른쪽 레이아웃: 출금/입금 + 금액
     QVBoxLayout *rightLayout = new QVBoxLayout;
-    rightLayout->setContentsMargins(0,0,0,0);
     rightLayout->setSpacing(0);
     rightLayout->setAlignment(Qt::AlignRight);
 
-    QLabel *typeLabel = new QLabel(type);
+    QString typeText = data.isExpense ? "출금" : "입금";
+    QColor typeColor = data.isExpense ? QColor("#1E40FF") : QColor("#D72638");
+
+    QLabel *typeLabel = new QLabel(typeText);
     typeLabel->setStyleSheet(QString("font-size: 12px; font-weight: bold; color: %1;").arg(typeColor.name()));
     typeLabel->setAlignment(Qt::AlignRight);
     rightLayout->addWidget(typeLabel);
 
-    QLabel *amountLabel = new QLabel(amount);
+    QLabel *amountLabel = new QLabel(data.amount + "원");
     amountLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
     amountLabel->setAlignment(Qt::AlignRight);
     rightLayout->addWidget(amountLabel);
@@ -318,6 +311,7 @@ QWidget* MainTransaction::createHistoryItem(
 
     return itemWidget;
 }
+
 
 void MainTransaction::updateCurrentBalance()
 {

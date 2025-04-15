@@ -55,6 +55,7 @@ private:
 
     QWidget* createHistoryItem(const TransactionData &data);
 
+
 public slots:
     void refreshTransactionList();
 
