@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QDateTime>
+#include <QMessageBox>
 
 class AddTransaction : public QWidget
 {

@@ -7,7 +7,7 @@ MainTransaction::MainTransaction(QWidget *parent)
 {
     setFixedSize(360, 640);
     setStyleSheet("background-color: white;");
-    setWindowTitle("계좌 관리");
+    setWindowTitle("가계부");
 
     // 루트 위젯 & 레이아웃
     QWidget *centralWidget = new QWidget(this);
@@ -25,7 +25,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     curMoneyTitle->setStyleSheet("font-size: 18px;");
     curMoneyTitle->setFixedHeight(38);
     curMoneyTitle->setContentsMargins(0, 0, 0, 0);
-    curMoney = new QLabel("₩2,010,000");
+    curMoney = new QLabel("₩0");
     curMoney->setStyleSheet("font-size: 32px; font-weight: bold;");
     curMoney->setFixedHeight(38);  // 너무 크지 않게 제한
 

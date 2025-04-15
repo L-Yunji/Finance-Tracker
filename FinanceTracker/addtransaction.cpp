@@ -27,7 +27,7 @@ AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
 
     connect(backBtn, &QPushButton::clicked, this, &AddTransaction::close);
 
-    setWindowTitle("키패드 입력");
+    setWindowTitle("내역 입력");
     setFixedSize(360, 640);
     setContentsMargins(32, 0, 32, 32);
 }
@@ -278,22 +278,35 @@ void AddTransaction::handleContinueClicked()
 {
     QString rawAmount = displayLabel->text();
     rawAmount.remove(QRegularExpression("[₩,\\s]"));
+    long long inputAmount = rawAmount.toLongLong();
+
     QString category = categoryComboBox->currentText();
     QString datetime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
+    // 현재 총 잔액 계산
+    long long currentBalance = 0;
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        long long amt = data.amount.toLongLong();
+        currentBalance += data.isExpense ? -amt : amt;
+    }
+
+    // 예외처리: 출금인데 잔액보다 크면 차단
+    if (expenseFlag && inputAmount > currentBalance) {
+        QMessageBox::warning(this, "출금 오류", "현재 잔액보다 많은 금액을 출금할 수 없습니다.");
+        return; // 더 이상 진행하지 않음
+    }
+
     TransactionData data;
-    data.amount = rawAmount;
+    data.amount = QString::number(inputAmount);
     data.category = category;
     data.dateTime = datetime;
-    data.isExpense = expenseFlag;  // 출금 또는 입금으로 구분
+    data.isExpense = expenseFlag;
 
-    // 3. 전역 거래 리스트에 저장하기
     TransactionStore::allTransactions.append(data);
 
-    emit transactionAdded();  // 시그널 발생
-    this->close();            // 창 닫기
+    emit transactionAdded();
+    this->close();
 
-    // 확인용 로그
     qDebug() << "[Transaction 저장됨]";
     qDebug() << data.amount << data.category << data.dateTime << data.isExpense;
 }
