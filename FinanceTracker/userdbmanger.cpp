@@ -34,3 +34,14 @@ bool UserDBManager::loginUser(const QString &username, const QString &password) 
     if (query.exec() && query.next()) return true;
     return false;
 }
+
+void UserDBManager::printAllUsers()
+{
+    QSqlQuery query("SELECT username, password FROM users");
+    qDebug() << "[저장된 사용자 목록]";
+    while (query.next()) {
+        QString username = query.value(0).toString();
+        QString password = query.value(1).toString();
+        qDebug() << "아이디:" << username << ", 비밀번호:" << password;
+    }
+}

@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
     // 1. 트랜잭션 데이터 타입 등록
     qRegisterMetaType<TransactionData>("TransactionData");
 
+    UserDBManager::printAllUsers();
     // 2. SQLite DB 초기화
     if (!UserDBManager::initDB()) {
         return -1; // DB 초기화 실패 시 종료

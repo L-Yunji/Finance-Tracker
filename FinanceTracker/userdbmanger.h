@@ -9,6 +9,7 @@ public:
     static bool initDB();
     static bool registerUser(const QString &username, const QString &password);
     static bool loginUser(const QString &username, const QString &password);
+    static void printAllUsers();
 };
 
 #endif // USERDBMANAGER_H
