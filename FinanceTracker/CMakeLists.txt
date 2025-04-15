@@ -20,6 +20,7 @@ qt_add_executable(FinanceTracker
     userdbmanger.h userdbmanger.cpp
     logindialog.h logindialog.cpp
     signupdialog.h signupdialog.cpp
+    TransactionStore.cpp
 )
 
 target_link_libraries(FinanceTracker

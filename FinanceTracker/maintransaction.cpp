@@ -7,8 +7,8 @@
 #include <QToolButton>
 #include <QMenu>
 
-MainTransaction::MainTransaction(QWidget *parent)
-    : QMainWindow(parent)
+MainTransaction::MainTransaction(const QString &username, QWidget *parent)
+    : QMainWindow(parent), currentUsername(username)
 {
     setFixedSize(360, 640);
     setStyleSheet("background-color: white;");

@@ -1,32 +1,31 @@
 #include "maintransaction.h"
-#include "TransactionData.h"
-#include "userdbmanger.h"
 #include "logindialog.h"
-
 #include <QApplication>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    // 1. 트랜잭션 데이터 타입 등록
-    qRegisterMetaType<TransactionData>("TransactionData");
+    // ✅ DB 연결 시작
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("transactions.db");
 
-    UserDBManager::printAllUsers();
-    // 2. SQLite DB 초기화
-    if (!UserDBManager::initDB()) {
-        return -1; // DB 초기화 실패 시 종료
+    if (!db.open()) {
+        qDebug() << "데이터베이스 열기 실패:" << db.lastError().text();
+        return -1;
     }
 
-    // 3. 로그인 창 표시
+    // ✅ 로그인 후 MainTransaction으로 이동
     LoginDialog login;
-    if (login.exec() != QDialog::Accepted) {
-        return 0; // 로그인 취소 또는 실패 시 종료
-    }
+    QObject::connect(&login, &LoginDialog::loginSuccess, [&](const QString &username) {
+        MainTransaction *w = new MainTransaction(username);
+        w->show();
+    });
 
-    // 4. 로그인 성공 시 메인 창 실행
-    MainTransaction w;
-    w.show();
+    login.exec();
 
     return a.exec();
 }
