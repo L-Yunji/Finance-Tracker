@@ -1,8 +1,10 @@
 #include "detailtransaction.h"
 #include "TransactionData.h"
+#include "TransactionStore.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFrame>
+#include <QMessageBox>
 
 DetailTransaction::DetailTransaction(QWidget *parent)
     : QWidget(parent)
@@ -110,6 +112,7 @@ void DetailTransaction::setupUI()
             font-weight: bold;
             font-size: 16px;
             border-radius: 10px;
+            cursor: pointer;
         }
         QPushButton:hover {
             background-color: #1517D5;
@@ -117,6 +120,7 @@ void DetailTransaction::setupUI()
         }
     )");
     updateBtn->setFixedHeight(45);
+    connect(updateBtn, &QPushButton::clicked, this, &DetailTransaction::onUpdateClicked);
 
     deleteBtn = new QPushButton("삭제하기", this);
     deleteBtn->setStyleSheet(R"(
@@ -126,6 +130,7 @@ void DetailTransaction::setupUI()
             font-size: 16px;
             font-weight: bold;
             border-radius: 10px;
+            cursor: pointer;
         }
         QPushButton:hover {
             background-color: #030303;
@@ -133,6 +138,8 @@ void DetailTransaction::setupUI()
         }
     )");
     deleteBtn->setFixedHeight(45);
+    connect(deleteBtn, &QPushButton::clicked, this, &DetailTransaction::onDeleteClicked);
+
 
     mainLayout->addWidget(updateBtn);
     mainLayout->addWidget(deleteBtn);
@@ -163,5 +170,35 @@ void DetailTransaction::setTransaction(const TransactionData &data)
     balanceLabel->setText(
         "<span style='color:" + typeColor + "; font-size:12px; font-weight: bold;'>"
         + typeText + "</span>");
+
+    currentTransaction = data;
+}
+
+void DetailTransaction::onUpdateClicked()
+{
+    qDebug() << "수정 버튼 클릭!";
+    for (TransactionData &item : TransactionStore::allTransactions) {
+        if (item.dateTime == currentTransaction.dateTime && item.amount == currentTransaction.amount) {
+            item.category = categoryComboBox->currentText();
+            item.memo = memoEdit->text();
+            emit transactionUpdated();
+            this->close();
+            return;
+        }
+    }
+}
+
+void DetailTransaction::onDeleteClicked()
+{
+    qDebug() << "삭제 버튼 클릭!";
+    for (int i = 0; i < TransactionStore::allTransactions.size(); ++i) {
+        const TransactionData &item = TransactionStore::allTransactions[i];
+        if (item.dateTime == currentTransaction.dateTime && item.amount == currentTransaction.amount) {
+            TransactionStore::allTransactions.removeAt(i);
+            emit transactionDeleted();
+            this->close();
+            return;
+        }
+    }
 }
 

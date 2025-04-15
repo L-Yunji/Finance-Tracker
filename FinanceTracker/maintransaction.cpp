@@ -44,6 +44,7 @@ MainTransaction::MainTransaction(QWidget *parent)
         border: none;
         border-radius: 12px;
         padding: 10px 20px;
+        cursor: pointer;
     }
     QPushButton:hover {
         background-color: #cddfff;
@@ -59,6 +60,7 @@ MainTransaction::MainTransaction(QWidget *parent)
         border: none;
         border-radius: 12px;
         padding: 10px 20px;
+        cursor: pointer;
     }
     QPushButton:hover {
         background-color: #cddfff;
@@ -228,7 +230,16 @@ void MainTransaction::showDetailWindow(const TransactionData &data)
     DetailTransaction *dtWin = new DetailTransaction();
     dtWin->setTransaction(data);
     dtWin->setAttribute(Qt::WA_DeleteOnClose);
+
+    // 현재 창 위치 기준으로 약간 오른쪽 아래로 띄우기
+    int offsetX = 30;
+    int offsetY = 30;
+    dtWin->move(this->x() + offsetX, this->y() + offsetY);
+
     dtWin->show();
+    connect(dtWin, &DetailTransaction::transactionUpdated, this, &MainTransaction::refreshTransactionList);
+    connect(dtWin, &DetailTransaction::transactionDeleted, this, &MainTransaction::refreshTransactionList);
+
 }
 
 bool MainTransaction::eventFilter(QObject *watched, QEvent *event)

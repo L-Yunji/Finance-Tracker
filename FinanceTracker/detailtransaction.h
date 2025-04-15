@@ -31,6 +31,19 @@ private:
     QPushButton *deleteBtn;
 
     void setupUI();
+
+private slots:
+    void onUpdateClicked();
+    void onDeleteClicked();
+
+signals:
+    void transactionUpdated();
+    void transactionDeleted();
+
+private:
+    TransactionData currentTransaction;
+
+
 };
 
 #endif // DETAILTRANSACTION_H
