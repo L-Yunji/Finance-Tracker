@@ -186,8 +186,10 @@ MainTransaction::MainTransaction(QWidget *parent)
     // 스크롤 영역만 mainLayout에 추가!
     mainLayout->addWidget(scrollArea);
 
+    currentFilter = "전체";
     // 저장된 거래 내역 불러오기
     loadTransactionHistory();
+    updateCurrentBalance();
     // 중앙 위젯 세팅
     setCentralWidget(centralWidget);
 }
@@ -209,17 +211,13 @@ QWidget* MainTransaction::createHistoryItem(
 
     // 왼쪽 영역: 아이콘 및 날짜/카테고리 텍스트 영역을 포함하는 수평 레이아웃
     QHBoxLayout *leftLayout = new QHBoxLayout;
-    leftLayout->setSpacing(8);
+    leftLayout->setContentsMargins(0,0,0,0);
+    leftLayout->setSpacing(12);
 
     // 1. 아이콘 레이블 (가장 왼쪽)
     QLabel *iconLabel = new QLabel;
+    iconLabel->setFixedSize(40,40);
     static QMap<QString, QString> categoryIconMap = {
-        // { "식비",    ":/icons/icons/food.png" },
-        // { "교통",    ":/icons/icons/transport.png" },
-        // { "쇼핑",    ":/icons/icons/shopping.png" },
-        // { "월급",    ":/icons/icons/salary.png" },
-        // { "용돈",    ":/icons/icons/allowance.png" },
-        // { "기타",    ":/icons/icons/default.png" }
         { "식비",    "food.png" },
         { "교통",    "transport.png" },
         { "쇼핑",    "shopping.png" },
@@ -260,6 +258,7 @@ QWidget* MainTransaction::createHistoryItem(
 
     // 오른쪽 영역: 거래 유형 및 금액 표시 (수직 레이아웃)
     QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->setContentsMargins(0,0,0,0);
     rightLayout->setSpacing(0);
     rightLayout->setAlignment(Qt::AlignRight);
 
