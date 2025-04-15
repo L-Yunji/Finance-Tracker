@@ -71,7 +71,7 @@ void AddTransaction::setupUI()
     getSendHeader = new QLabel(titleText);
     getSendHeader->setAlignment(Qt::AlignCenter);
     QFont titleFont;
-    titleFont.setPointSize(14);
+    titleFont.setPointSize(18);
     titleFont.setWeight(QFont::Black);
     getSendHeader->setFont(titleFont);
     getSendHeader->setStyleSheet("color: #4F4F4F;");
