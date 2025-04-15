@@ -175,16 +175,32 @@ void DetailTransaction::setTransaction(const TransactionData &data)
 void DetailTransaction::onUpdateClicked()
 {
     qDebug() << "수정 버튼 클릭!";
+
+    QString newCategory = categoryComboBox->currentText();
+    QString newMemo = memoEdit->text();
+
+    // 1. DB에 업데이트
+    bool success = TransactionStore::updateTransaction(currentTransaction.id, newCategory, newMemo);
+
+    if (!success) {
+        QMessageBox::warning(this, "수정 실패", "DB 업데이트에 실패했습니다.");
+        return;
+    }
+
+    // 2. 메모리 상 거래 정보도 업데이트
     for (TransactionData &item : TransactionStore::allTransactions) {
-        if (item.dateTime == currentTransaction.dateTime && item.amount == currentTransaction.amount) {
-            item.category = categoryComboBox->currentText();
-            item.memo = memoEdit->text();
-            emit transactionUpdated();
-            this->close();
-            return;
+        if (item.id == currentTransaction.id) {
+            item.category = newCategory;
+            item.memo = newMemo;
+            break;
         }
     }
+
+    // 3. 현재 창 닫기 + 메인 화면 갱신 트리거
+    emit transactionUpdated();
+    this->close();
 }
+
 
 void DetailTransaction::onDeleteClicked()
 {
