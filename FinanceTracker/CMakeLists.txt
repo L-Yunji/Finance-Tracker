@@ -16,6 +16,8 @@ qt_add_executable(FinanceTracker
     icons.qrc
     TransactionData.h
     TransactionStore.h
+    icons.qrc
+    build/Desktop_Qt_6_8_1_MinGW_64_bit-Debug/imagefile.qrc
 )
 
 target_link_libraries(FinanceTracker

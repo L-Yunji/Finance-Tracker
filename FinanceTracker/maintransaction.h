@@ -11,6 +11,9 @@
 #include <QMenu>
 #include <QString>
 #include <QGraphicsDropShadowEffect>
+#include <QMap>
+#include <QDebug>
+#include <QImageReader>
 
 class MainTransaction : public QMainWindow
 {
