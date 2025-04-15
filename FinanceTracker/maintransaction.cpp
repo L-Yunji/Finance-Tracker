@@ -42,7 +42,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     getBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;
-        color: #1E40FF;
+        color: #3033A2;
         font-size: 16px;
         font-weight: bold;
         border: none;
@@ -57,7 +57,7 @@ MainTransaction::MainTransaction(QWidget *parent)
     sendBtn->setStyleSheet(R"(
     QPushButton {
         background-color: #DDEBFF;
-        color: #1E40FF;
+        color: #3033A2;
         font-size: 16px;
         font-weight: bold;
         border: none;
@@ -134,12 +134,11 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     filterBtn->setStyleSheet(R"(
     QToolButton {
-        background-color: #D5D6DA;
-        border: none;
+        background-color: transparent;
+        border: 1px solid #D5D6DA;
         border-radius: 12px;
         padding: 8px 16px;
         font-size: 14px;
-        font-weight: bold;
         color: #030303;
     }
     QToolButton:hover {
@@ -154,7 +153,7 @@ MainTransaction::MainTransaction(QWidget *parent)
         subcontrol-position: center right;
         image: none;
     }
-    )");
+)");
 
     headerLayout->addWidget(listHistoryTitle);
     headerLayout->addStretch();
