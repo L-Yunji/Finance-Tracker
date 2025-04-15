@@ -31,8 +31,6 @@ AddTransaction::AddTransaction(bool isExpense, const QString &username, QWidget 
     setContentsMargins(32, 0, 32, 32);
 }
 
-
-
 AddTransaction::~AddTransaction() {}
 
 void AddTransaction::setupUI()

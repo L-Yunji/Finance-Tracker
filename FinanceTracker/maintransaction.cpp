@@ -211,6 +211,7 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
 
     currentFilter = "전체";
     loadTransactionHistory();
+    updateCurrentBalance();
     setCentralWidget(centralWidget);
 }
 
