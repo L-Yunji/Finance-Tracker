@@ -116,6 +116,7 @@ void LoginDialog::handleLogin() {
         // 예쁜 커스텀 경고창
         QDialog *dialog = new QDialog(this);
         dialog->setFixedSize(300, 180);
+        dialog->setWindowTitle("Warning");
         dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
         dialog->setStyleSheet(R"(
