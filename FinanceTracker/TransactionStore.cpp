@@ -87,5 +87,18 @@ bool updateTransaction(int id, const QString &category, const QString &memo) {
     return true;
 }
 
+bool deleteTransaction(int id) {
+    QSqlQuery query;
+    query.prepare("DELETE FROM transactions WHERE id = ?");
+    query.addBindValue(id);
+
+    if (!query.exec()) {
+        qDebug() << "삭제 실패:" << query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+
 
 }
