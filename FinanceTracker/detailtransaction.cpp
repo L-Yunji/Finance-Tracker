@@ -224,6 +224,7 @@ void DetailTransaction::setTransaction(const TransactionData &data)
 
     balanceLabel->setText("<span style='color:" + typeColor + "; font-size:12px; font-weight: bold;'>" + typeText + "</span>");
     currentTransaction = data;
+    currentTransaction.id = data.id;
 }
 
 void DetailTransaction::onUpdateClicked()
@@ -253,13 +254,29 @@ void DetailTransaction::onUpdateClicked()
 
 void DetailTransaction::onDeleteClicked()
 {
+    qDebug() << "삭제 버튼 클릭!";
+
+    int id = currentTransaction.id;
+    if (id < 0) {
+        QMessageBox::warning(this, "오류", "삭제할 수 없는 거래입니다. ID 없음.");
+        return;
+    }
+
+    // 1. DB에서 삭제
+    if (!TransactionStore::deleteTransaction(id)) {
+        QMessageBox::warning(this, "삭제 실패", "DB에서 삭제하지 못했습니다.");
+        return;
+    }
+
+    // 2. 메모리에서도 삭제
     for (int i = 0; i < TransactionStore::allTransactions.size(); ++i) {
-        const TransactionData &item = TransactionStore::allTransactions[i];
-        if (item.dateTime == currentTransaction.dateTime && item.amount == currentTransaction.amount) {
+        if (TransactionStore::allTransactions[i].id == id) {
             TransactionStore::allTransactions.removeAt(i);
-            emit transactionDeleted();
-            this->close();
-            return;
+            break;
         }
     }
+
+    emit transactionDeleted();
+    this->close();
 }
+
