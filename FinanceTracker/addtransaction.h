@@ -64,6 +64,7 @@ private:
     void setupKeyboard();
     void handleKeyInput(const QString &input);
     void buttonClicked();
+    void showWarningDialog(const QString &message);
 
 };
 
