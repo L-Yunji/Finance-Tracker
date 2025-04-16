@@ -22,7 +22,7 @@ class MainTransaction : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainTransaction(QWidget *parent = nullptr);
+    explicit MainTransaction(const QString &username, QWidget *parent = nullptr);
     ~MainTransaction();
 
 private:
@@ -36,6 +36,7 @@ private:
     QLabel *listHistoryTitle;
     QToolButton *filterBtn;
     QString currentFilter;
+    QString currentUsername;
 
     QLabel *foodIc;
     QLabel *foodTitle;

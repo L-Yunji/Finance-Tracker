@@ -8,6 +8,7 @@
 #include <QAbstractItemView>
 #include <QMenu>
 #include <QPushButton>
+#include <QLocale>
 
 DetailTransaction::DetailTransaction(QWidget *parent)
     : QWidget(parent)
@@ -213,7 +214,10 @@ void DetailTransaction::setTransaction(const TransactionData &data)
 
     memoEdit->setText(data.memo);
     dateLabel->setText(data.dateTime);
-    amountLabel->setText(data.amount + "원");
+
+    QLocale locale = QLocale::system();
+    QString formattedAmount = locale.toString(data.amount.toLongLong());
+    amountLabel->setText(formattedAmount + "원");
 
     QString typeText = data.isExpense ? "출금" : "입금";
     QString typeColor = data.isExpense ? "#1E40FF" : "#E53935";
@@ -224,16 +228,28 @@ void DetailTransaction::setTransaction(const TransactionData &data)
 
 void DetailTransaction::onUpdateClicked()
 {
+    qDebug() << "수정 버튼 클릭!";
+    QString newCategory = selectedCategory;  // 현재 선택된 카테고리 저장 변수
+    QString newMemo = memoEdit->text();
+    // 1. DB에 업데이트
+    bool success = TransactionStore::updateTransaction(currentTransaction.id, newCategory, newMemo);
+    if (!success) {
+        QMessageBox::warning(this, "수정 실패", "DB 업데이트에 실패했습니다.");
+        return;
+    }
+    // 2. 메모리 상 거래 정보도 업데이트
     for (TransactionData &item : TransactionStore::allTransactions) {
-        if (item.dateTime == currentTransaction.dateTime && item.amount == currentTransaction.amount) {
-            item.category = selectedCategory;
-            item.memo = memoEdit->text();
-            emit transactionUpdated();
-            this->close();
-            return;
+        if (item.id == currentTransaction.id) {
+            item.category = newCategory;
+            item.memo = newMemo;
+            break;
         }
     }
+    // 3. 현재 창 닫기 + 메인 화면 갱신 트리거
+    emit transactionUpdated();
+    this->close();
 }
+
 
 void DetailTransaction::onDeleteClicked()
 {

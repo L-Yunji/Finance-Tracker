@@ -13,9 +13,10 @@
 #include <QComboBox>
 #include <QMenu>
 
-AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
+AddTransaction::AddTransaction(bool isExpense, const QString &username, QWidget *parent)
     : QWidget(parent),
     expenseFlag(isExpense),
+    currentUsername(username),
     displayLabel(nullptr),
     keyboardWidget(nullptr),
     keyboardLayout(nullptr),
@@ -25,9 +26,7 @@ AddTransaction::AddTransaction(bool isExpense, QWidget *parent)
 {
     setupUI();
     setupKeyboard();
-
     connect(backBtn, &QPushButton::clicked, this, &AddTransaction::close);
-
     setWindowTitle("내역 입력");
     setFixedSize(360, 640);
     setContentsMargins(32, 0, 32, 32);
@@ -258,32 +257,17 @@ void AddTransaction::setupKeyboard()
 void AddTransaction::deleteButtonClicked()
 {
     QString currentText = displayLabel->text();
-    currentText.remove(',');
+    currentText.remove(QRegularExpression("[^0-9]"));  // 숫자만 남김
 
     if (currentText.length() <= 1) {
-        displayLabel->setText("0");
-        return;
-    }
-
-    currentText.chop(1);
-
-    QString integerPart = currentText;
-    QString decimalPart;
-
-    if (currentText.contains('.')) {
-        QStringList parts = currentText.split('.');
-        integerPart = parts[0];
-        decimalPart = parts[1];
+        currentText = "0";
+    } else {
+        currentText.chop(1);
     }
 
     QLocale locale = QLocale::system();
-    QString formattedText = locale.toString(integerPart.toLongLong());
-
-    if (!decimalPart.isEmpty()) {
-        formattedText += "." + decimalPart;
-    }
-
-    displayLabel->setText(formattedText);
+    QString formatted = locale.toString(currentText.toLongLong());
+    displayLabel->setText("₩" + formatted);
 }
 
 void AddTransaction::handleContinueClicked()
@@ -538,7 +522,7 @@ void AddTransaction::handleContinueClicked()
     data.dateTime = datetime;
     data.isExpense = expenseFlag;
 
-    TransactionStore::allTransactions.append(data);
+    TransactionStore::addTransaction(currentUsername, data);
 
     emit transactionAdded();
     this->close();

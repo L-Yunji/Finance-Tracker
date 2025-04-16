@@ -3,10 +3,14 @@
 
 #include "TransactionData.h"
 #include <QList>
+#include <QString>
 
 namespace TransactionStore {
-// 모든 거래 데이터를 담는 전역 리스트
-inline QList<TransactionData> allTransactions;
+extern QList<TransactionData> allTransactions;
+
+void loadFromDB(const QString &username);
+void addTransaction(const QString &username, const TransactionData &data);
+bool updateTransaction(int id, const QString &category, const QString &memo);
 }
 
 #endif // TRANSACTIONSTORE_H
