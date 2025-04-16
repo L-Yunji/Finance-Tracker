@@ -457,7 +457,75 @@ void MainTransaction::exportToCSV()
     }
 
     file.close();
-    QMessageBox::information(this, "완료", "CSV 파일로 내보내기가 완료되었습니다.");
+    QDialog *dialog = new QDialog(this);
+    dialog->setFixedSize(300, 180);
+    dialog->setWindowTitle("완료");
+    dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    dialog->setStyleSheet(R"(
+    QDialog {
+        background-color: #ffffff;
+        border-radius: 16px;
+    }
+
+    QLabel#Title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2C2C2C;
+    }
+
+    QLabel#Message {
+        font-size: 14px;
+        color: #555555;
+        padding: 0 20px;
+    }
+
+    QPushButton {
+        background-color: #4CAF50;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 8px 24px;
+        border: none;
+        border-radius: 6px;
+    }
+
+    QPushButton:hover {
+        background-color: #43A047;
+    }
+
+    QPushButton:pressed {
+        background-color: #388E3C;
+    }
+)");
+
+    QVBoxLayout *layout = new QVBoxLayout(dialog);
+    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(12);
+
+    QLabel *title = new QLabel("완료", dialog);
+    title->setObjectName("Title");
+    title->setAlignment(Qt::AlignCenter);
+
+    QLabel *message = new QLabel("CSV 파일로 내보내기가 완료되었습니다.", dialog);
+    message->setObjectName("Message");
+    message->setAlignment(Qt::AlignCenter);
+    message->setWordWrap(true);
+
+    QPushButton *okButton = new QPushButton("확인", dialog);
+    okButton->setCursor(Qt::PointingHandCursor);
+    okButton->setFixedWidth(100);
+    connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
+
+    QHBoxLayout *btnLayout = new QHBoxLayout;
+    btnLayout->addStretch();
+    btnLayout->addWidget(okButton);
+    btnLayout->addStretch();
+
+    layout->addWidget(title);
+    layout->addWidget(message);
+    layout->addLayout(btnLayout);
+
+    dialog->exec();
 }
 
 void MainTransaction::closeEvent(QCloseEvent *event)
