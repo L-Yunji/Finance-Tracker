@@ -242,32 +242,17 @@ void AddTransaction::setupKeyboard()
 void AddTransaction::deleteButtonClicked()
 {
     QString currentText = displayLabel->text();
-    currentText.remove(',');
+    currentText.remove(QRegularExpression("[^0-9]"));  // 숫자만 남김
 
     if (currentText.length() <= 1) {
-        displayLabel->setText("0");
-        return;
-    }
-
-    currentText.chop(1);
-
-    QString integerPart = currentText;
-    QString decimalPart;
-
-    if (currentText.contains('.')) {
-        QStringList parts = currentText.split('.');
-        integerPart = parts[0];
-        decimalPart = parts[1];
+        currentText = "0";
+    } else {
+        currentText.chop(1);
     }
 
     QLocale locale = QLocale::system();
-    QString formattedText = locale.toString(integerPart.toLongLong());
-
-    if (!decimalPart.isEmpty()) {
-        formattedText += "." + decimalPart;
-    }
-
-    displayLabel->setText(formattedText);
+    QString formatted = locale.toString(currentText.toLongLong());
+    displayLabel->setText("₩" + formatted);
 }
 
 void AddTransaction::handleContinueClicked()
