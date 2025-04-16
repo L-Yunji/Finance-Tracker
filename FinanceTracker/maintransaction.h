@@ -58,7 +58,8 @@ private:
 
     QWidget* createHistoryItem(const TransactionData &data);
     QLineEdit *searchInput; // 멤버 변수 선언
-
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 public slots:
     void refreshTransactionList();
