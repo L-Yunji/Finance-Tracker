@@ -230,7 +230,7 @@ void DetailTransaction::onUpdateClicked()
 {
     qDebug() << "수정 버튼 클릭!";
 
-    QString newCategory = categoryComboBox->currentText();
+    QString newCategory = selectedCategory;  // 현재 선택된 카테고리 저장 변수
     QString newMemo = memoEdit->text();
 
     // 1. DB에 업데이트
