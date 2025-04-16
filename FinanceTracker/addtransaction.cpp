@@ -279,20 +279,63 @@ void AddTransaction::deleteButtonClicked()
     QString formatted = locale.toString(currentText.toLongLong());
     displayLabel->setText("₩" + formatted);
 }
-
 void AddTransaction::handleContinueClicked()
 {
     QString rawAmount = displayLabel->text();
     rawAmount.remove(QRegularExpression("[₩,\\s]"));
     long long inputAmount = rawAmount.toLongLong();
 
-    // Category가 비었는 지 확인하기
-    if (selectedCategory.isEmpty()) {
-        QDialog *dialog = new QDialog(this);
-        dialog->setFixedSize(300, 180);
-        dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);  // 테두리 유지
+    // 1. 금액이 0원 이상인지 확인
+    if (inputAmount == 0) {
+        showWarningDialog("0원 이상 입력해주세요.");
+        return;
+    }
 
-        dialog->setStyleSheet(R"(
+    // 2. 카테고리가 선택됐는지 확인
+    if (selectedCategory.isEmpty()) {
+        showWarningDialog("카테고리를 선택해주세요.");
+        return;
+    }
+
+    QString datetime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+
+    // 3. 출금인데 잔액보다 많은 금액이면 차단
+    long long currentBalance = 0;
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        long long amt = data.amount.toLongLong();
+        currentBalance += data.isExpense ? -amt : amt;
+    }
+
+    if (expenseFlag && inputAmount > currentBalance) {
+        showWarningDialog("현재 잔액보다 많은 금액을\n지출할 수 없습니다.");
+        return;
+    }
+
+    // 4. 거래 데이터 저장
+    TransactionData data;
+    data.amount = QString::number(inputAmount);
+    data.category = selectedCategory;
+    data.dateTime = datetime;
+    data.isExpense = expenseFlag;
+    // data.memo = memoEdit->text(); // 필요 시 추가
+
+    TransactionStore::addTransaction(currentUsername, data);
+
+    emit transactionAdded();
+    this->close();
+
+    qDebug() << "[Transaction 저장됨]";
+    qDebug() << data.amount << data.category << data.dateTime << data.isExpense;
+}
+
+void AddTransaction::showWarningDialog(const QString &message)
+{
+    QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle("ERROR");
+    dialog->setFixedSize(300, 180);
+    dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
+    dialog->setStyleSheet(R"(
         QDialog {
             background-color: #ffffff;
             border: 1px solid #E0E0E0;
@@ -330,213 +373,32 @@ void AddTransaction::handleContinueClicked()
         }
     )");
 
-        QVBoxLayout *layout = new QVBoxLayout(dialog);
-        layout->setContentsMargins(20, 20, 20, 20);
-        layout->setSpacing(12);
+    QVBoxLayout *layout = new QVBoxLayout(dialog);
+    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(12);
 
-        QLabel *title = new QLabel("Warning!", dialog);
-        title->setObjectName("Title");
-        title->setAlignment(Qt::AlignCenter);
+    QLabel *title = new QLabel("Warning!", dialog);
+    title->setObjectName("Title");
+    title->setAlignment(Qt::AlignCenter);
 
-        QLabel *message = new QLabel("카테고리를 선택해주세요.", dialog);
-        message->setObjectName("Message");
-        message->setAlignment(Qt::AlignCenter);
+    QLabel *msg = new QLabel(message, dialog);
+    msg->setObjectName("Message");
+    msg->setAlignment(Qt::AlignCenter);
 
-        QPushButton *okButton = new QPushButton("확인", dialog);
-        okButton->setCursor(Qt::PointingHandCursor);
-        okButton->setFixedWidth(100);
-        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
+    QPushButton *okButton = new QPushButton("확인", dialog);
+    okButton->setCursor(Qt::PointingHandCursor);
+    okButton->setFixedWidth(100);
+    connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
 
-        QHBoxLayout *btnLayout = new QHBoxLayout;
-        btnLayout->addStretch();
-        btnLayout->addWidget(okButton);
-        btnLayout->addStretch();
+    QHBoxLayout *btnLayout = new QHBoxLayout;
+    btnLayout->addStretch();
+    btnLayout->addWidget(okButton);
+    btnLayout->addStretch();
 
-        layout->addWidget(title);
-        layout->addWidget(message);
-        layout->addLayout(btnLayout);
+    layout->addWidget(title);
+    layout->addWidget(msg);
+    layout->addLayout(btnLayout);
 
-        dialog->exec();
-        return;
-    }
-
-
-    // 예외처리: 0원 이상만 등록 가능
-    if (inputAmount == 0) {
-        QDialog *dialog = new QDialog(this);
-        dialog->setFixedSize(300, 180);
-        dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);  // 테두리 유지
-
-        dialog->setStyleSheet(R"(
-    QDialog {
-        background-color: #ffffff;
-        border: 1px solid #E0E0E0;
-        border-radius: 16px;
-    }
-
-    QLabel#Title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #2C2C2C;
-    }
-
-    QLabel#Message {
-        font-size: 14px;
-        color: #555555;
-        padding: 0 20px;
-    }
-
-    QPushButton {
-        background-color: #FF5E5E;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 8px 24px;
-        border: none;
-        border-radius: 6px;
-    }
-
-    QPushButton:hover {
-        background-color: #E14C4C;
-    }
-
-    QPushButton:pressed {
-        background-color: #B73838;
-    }
-)");
-
-        QVBoxLayout *layout = new QVBoxLayout(dialog);
-        layout->setContentsMargins(20, 20, 20, 20);
-        layout->setSpacing(12);
-
-        // 제목 라벨
-        QLabel *title = new QLabel("Warning!", dialog);
-        title->setObjectName("Title");
-        title->setAlignment(Qt::AlignCenter);
-
-        // 메시지 라벨
-        QLabel *message = new QLabel("0원 이상 입력해주세요.", dialog);
-        message->setObjectName("Message");
-        message->setAlignment(Qt::AlignCenter);
-
-        // 확인 버튼
-        QPushButton *okButton = new QPushButton("확인", dialog);
-        okButton->setCursor(Qt::PointingHandCursor);
-        okButton->setFixedWidth(100);
-        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
-
-        // 버튼 중앙 배치
-        QHBoxLayout *btnLayout = new QHBoxLayout;
-        btnLayout->addStretch();
-        btnLayout->addWidget(okButton);
-        btnLayout->addStretch();
-
-        // 배치 정리
-        layout->addWidget(title);
-        layout->addWidget(message);
-        layout->addLayout(btnLayout);
-
-        // 다이얼로그 실행
-        dialog->exec();
-        return;
-    }
-
-    QString category = selectedCategory;
-    QString datetime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
-
-    // 현재 총 잔액 계산
-    long long currentBalance = 0;
-    for (const TransactionData &data : TransactionStore::allTransactions) {
-        long long amt = data.amount.toLongLong();
-        currentBalance += data.isExpense ? -amt : amt;
-    }
-
-    // 예외처리: 출금인데 잔액보다 크면 차단
-    if (expenseFlag && inputAmount > currentBalance) {
-        QDialog *dialog = new QDialog(this);
-        dialog->setFixedSize(300, 180);
-        dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);  // 테두리 O
-
-        dialog->setStyleSheet(R"(
-    QDialog {
-        background-color: #ffffff;
-        border-radius: 16px;
-        border: 1px solid #E0E0E0;
-    }
-
-    QLabel#Title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #2C2C2C;
-    }
-
-    QLabel#Message {
-        font-size: 14px;
-        color: #555555;
-        padding: 0 20px;
-    }
-
-    QPushButton {
-        background-color: #FF5E5E;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 8px 24px;
-        border: none;
-        border-radius: 6px;
-    }
-
-    QPushButton:hover {
-        background-color: #E14C4C;
-    }
-
-    QPushButton:pressed {
-        background-color: #B73838;
-    }
-)");
-
-        QVBoxLayout *layout = new QVBoxLayout(dialog);
-        layout->setContentsMargins(20, 20, 20, 20);
-        layout->setSpacing(12);
-
-        QLabel *title = new QLabel("Warning!", dialog);
-        title->setObjectName("Title");
-        title->setAlignment(Qt::AlignCenter);
-
-        QLabel *message = new QLabel("현재 잔액보다 많은 금액을\n출금할 수 없습니다.", dialog);
-        message->setObjectName("Message");
-        message->setAlignment(Qt::AlignCenter);
-
-        QPushButton *okButton = new QPushButton("확인", dialog);
-        okButton->setCursor(Qt::PointingHandCursor);
-        okButton->setFixedWidth(100);
-        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
-
-        QHBoxLayout *btnLayout = new QHBoxLayout;
-        btnLayout->addStretch();
-        btnLayout->addWidget(okButton);
-        btnLayout->addStretch();
-
-        layout->addWidget(title);
-        layout->addWidget(message);
-        layout->addLayout(btnLayout);
-
-        dialog->exec();
-
-        return; // 더 이상 진행하지 않음
-    }
-
-    TransactionData data;
-    data.amount = QString::number(inputAmount);
-    data.category = category;
-    data.dateTime = datetime;
-    data.isExpense = expenseFlag;
-
-    TransactionStore::addTransaction(currentUsername, data);
-
-    emit transactionAdded();
-    this->close();
-
-    qDebug() << "[Transaction 저장됨]";
-    qDebug() << data.amount << data.category << data.dateTime << data.isExpense;
+    dialog->exec();
 }
+
