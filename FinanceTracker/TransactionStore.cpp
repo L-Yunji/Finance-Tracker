@@ -54,7 +54,7 @@ void loadFromDB(const QString &username) {
 
 }
 
-void addTransaction(const QString &username, const TransactionData &data) {
+void addTransaction(const QString &username, TransactionData &data) {
     QSqlQuery query;
     query.prepare("INSERT INTO transactions (username, category, amount, isExpense, dateTime, memo) VALUES (?, ?, ?, ?, ?, ?)");
     query.addBindValue(username);
@@ -66,9 +66,10 @@ void addTransaction(const QString &username, const TransactionData &data) {
 
     if (!query.exec()) {
         qDebug() << "저장 오류:" << query.lastError().text();
-    } else {
-        qDebug() << "거래 저장 성공!";
+        return;
     }
+
+    data.id = query.lastInsertId().toInt();
 
     allTransactions.append(data);
 }

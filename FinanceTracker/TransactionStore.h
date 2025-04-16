@@ -9,7 +9,7 @@ namespace TransactionStore {
 extern QList<TransactionData> allTransactions;
 
 void loadFromDB(const QString &username);
-void addTransaction(const QString &username, const TransactionData &data);
+void addTransaction(const QString &username, TransactionData &data);
 bool updateTransaction(int id, const QString &category, const QString &memo);
 bool deleteTransaction(int id);
 
