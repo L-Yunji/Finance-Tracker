@@ -270,6 +270,7 @@ void MainTransaction::filterTransactionList(const QString &keyword)
     }
 
     if (count == 0) {
+        emptyMessageLabel->setText("카테고리가 존재하지 않습니다");
         emptyMessageLabel->show();
     } else {
         emptyMessageLabel->hide();
@@ -458,5 +459,96 @@ void MainTransaction::exportToCSV()
     file.close();
     QMessageBox::information(this, "완료", "CSV 파일로 내보내기가 완료되었습니다.");
 }
+
+void MainTransaction::closeEvent(QCloseEvent *event)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("로그아웃 확인");
+    dialog.setFixedSize(300, 180);
+    dialog.setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    dialog.setStyleSheet(R"(
+        QDialog {
+            background-color: #ffffff;
+            border-radius: 16px;
+        }
+
+        QLabel#Title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2C2C2C;
+        }
+
+        QLabel#Message {
+            font-size: 14px;
+            color: #555555;
+            padding: 0 20px;
+        }
+
+        QPushButton {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 24px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        QPushButton#Yes {
+            background-color: #FF5E5E;
+            color: white;
+        }
+
+        QPushButton#No {
+            background-color: #D5D6DA;
+            color: #333;
+        }
+
+        QPushButton#Yes:hover {
+            background-color: #E14C4C;
+        }
+
+        QPushButton#No:hover {
+            background-color: #B0B0B0;
+        }
+    )");
+
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(12);
+
+    QLabel *title = new QLabel("로그아웃", &dialog);
+    title->setObjectName("Title");
+    title->setAlignment(Qt::AlignCenter);
+
+    QLabel *message = new QLabel("로그아웃 후 종료하시겠습니까?", &dialog);
+    message->setObjectName("Message");
+    message->setAlignment(Qt::AlignCenter);
+    message->setWordWrap(true);
+
+    QPushButton *yesBtn = new QPushButton("확인", &dialog);
+    yesBtn->setObjectName("Yes");
+    QPushButton *noBtn = new QPushButton("취소", &dialog);
+    noBtn->setObjectName("No");
+
+    connect(yesBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(noBtn, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    QHBoxLayout *btnLayout = new QHBoxLayout;
+    btnLayout->addStretch();
+    btnLayout->addWidget(noBtn);
+    btnLayout->addWidget(yesBtn);
+    btnLayout->addStretch();
+
+    layout->addWidget(title);
+    layout->addWidget(message);
+    layout->addLayout(btnLayout);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        // 로그아웃 처리 필요 시 여기에 작성
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
 
 MainTransaction::~MainTransaction() {}
