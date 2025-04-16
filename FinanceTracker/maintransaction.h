@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <QImageReader>
 #include <QFileDialog>
+#include <QLineEdit>
 
 class MainTransaction : public QMainWindow
 {
@@ -56,6 +57,7 @@ private:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
     QWidget* createHistoryItem(const TransactionData &data);
+    QLineEdit *searchInput; // 멤버 변수 선언
 
 
 public slots:
@@ -64,6 +66,7 @@ public slots:
     void filterAll();
     void filterDeposit();
     void filterWithdrawal();
+    void filterTransactionList(const QString &keyword);
 
 
 };

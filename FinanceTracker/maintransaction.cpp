@@ -116,6 +116,9 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
     });
 
     mainLayout->addSpacing(12);
+
+
+
     QHBoxLayout *headerLayout = new QHBoxLayout();
     listHistoryTitle = new QLabel("가계 내역");
     listHistoryTitle->setStyleSheet("font-size: 14px; color: #4F4F4F;");
@@ -189,6 +192,13 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
     headerLayout->addWidget(filterBtn);
     mainLayout->addLayout(headerLayout);
 
+    // 🔹 검색창 추가
+    searchInput = new QLineEdit(this);
+    searchInput->setPlaceholderText("카테고리를 검색해주세요.");
+    searchInput->setStyleSheet("padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 13px;");
+    mainLayout->addWidget(searchInput);
+    connect(searchInput, &QLineEdit::textChanged, this, &MainTransaction::filterTransactionList);
+
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
@@ -234,6 +244,36 @@ void MainTransaction::filterWithdrawal() {
     currentFilter = "출금";
     filterBtn->setText("출금");
     refreshTransactionList();
+}
+
+void MainTransaction::filterTransactionList(const QString &keyword)
+{
+    QLayoutItem *child;
+    while ((child = historyListLayout->takeAt(0)) != nullptr) {
+        if (child->widget()) delete child->widget();
+        delete child;
+    }
+
+    int count = 0;
+    for (const TransactionData &data : TransactionStore::allTransactions) {
+        if ((currentFilter == "전체" ||
+             (currentFilter == "입금" && !data.isExpense) ||
+             (currentFilter == "출금" && data.isExpense)) &&
+            (data.dateTime.contains(keyword, Qt::CaseInsensitive) ||
+             data.category.contains(keyword, Qt::CaseInsensitive) ||
+             (keyword == "입금" && !data.isExpense) ||
+             (keyword == "출금" && data.isExpense)))
+        {
+            historyListLayout->addWidget(createHistoryItem(data));
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        emptyMessageLabel->show();
+    } else {
+        emptyMessageLabel->hide();
+    }
 }
 
 void MainTransaction::loadTransactionHistory()
