@@ -11,6 +11,7 @@
 #include <QString>
 #include <QLocale>
 #include <QComboBox>
+#include <QMenu>
 
 AddTransaction::AddTransaction(bool isExpense, const QString &username, QWidget *parent)
     : QWidget(parent),
@@ -70,7 +71,7 @@ void AddTransaction::setupUI()
     getSendHeader = new QLabel(titleText);
     getSendHeader->setAlignment(Qt::AlignCenter);
     QFont titleFont;
-    titleFont.setPointSize(14);
+    titleFont.setPointSize(18);
     titleFont.setWeight(QFont::Black);
     getSendHeader->setFont(titleFont);
     getSendHeader->setStyleSheet("color: #4F4F4F;");
@@ -95,52 +96,66 @@ void AddTransaction::setupUI()
     mainLayout->addWidget(displayLabel);
     mainLayout->addSpacing(12);
 
-    // 3. 카테고리 콤보박스
-    categoryComboBox = new QComboBox(this);
-    if (expenseFlag) {
-        // 출금일 때
-        categoryComboBox->addItem("식비");
-        categoryComboBox->addItem("교통");
-        categoryComboBox->addItem("쇼핑");
-        categoryComboBox->addItem("기타");
-    } else {
-        // 입금일 때
-        categoryComboBox->addItem("월급");
-        categoryComboBox->addItem("용돈");
-        categoryComboBox->addItem("기타");
-    }
-    categoryComboBox->setStyleSheet(R"(
-    QComboBox {
+    // 3. 카테고리 버튼 + 메뉴로 교체
+    categoryDropdownBtn = new QPushButton("카테고리 선택 ▾", this);
+    categoryDropdownBtn->setCursor(Qt::PointingHandCursor);
+    categoryDropdownBtn->setStyleSheet(R"(
+    QPushButton {
         background-color: white;
-        border: 1px solid #D5D6DA;
+        border: none;
         border-radius: 12px;
-        padding: 8px 12px;
-        font-size: 14px;
-        color: #333333;
+        padding: 8px 0px;
+        font-size: 18px;
+        color: #030303;
+        text-align: left;
     }
-
-    QComboBox::drop-down {
-        subcontrol-origin: padding;
-        subcontrol-position: top right;
-        width: 24px;
-        border-left: 1px solid #D5D6DA;
-    }
-
-    QComboBox::down-arrow {
-        width: 12px;
-        height: 12px;
-    }
-
-    QComboBox QAbstractItemView {
-        background-color: white;
-        border: 1px solid #D5D6DA;
-        selection-background-color: #B3D5FF;
-        padding: 6px;
+    QPushButton::menu-indicator {
+        width: 0px;
+        height: 0px;
+        image: none;
+        subcontrol-position: right center;
+        subcontrol-origin: content;
     }
 )");
-    categoryComboBox->setFixedHeight(45);  // 높이 통일
-    mainLayout->addWidget(categoryComboBox);
+
+    categoryMenu = new QMenu(this);
+    categoryMenu->setStyleSheet(R"(
+    QMenu {
+        background-color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 4px;
+    }
+    QMenu::item {
+        background-color: white;
+        color: #030303;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin: 2px;
+    }
+    QMenu::item:selected {
+        background-color: #B3D5FF;
+        color: white;
+    }
+)");
+
+    QStringList categoryList = expenseFlag
+                                   ? QStringList{ "식비", "교통", "쇼핑", "기타" }
+                                   : QStringList{ "월급", "용돈", "기타" };
+
+    for (const QString &item : categoryList) {
+        QAction *action = categoryMenu->addAction(item);
+        connect(action, &QAction::triggered, this, [=]() {
+            selectedCategory = item;
+            categoryDropdownBtn->setText(item + " ▾");
+        });
+    }
+
+    categoryDropdownBtn->setMenu(categoryMenu);
+    mainLayout->addWidget(categoryDropdownBtn);
     mainLayout->addSpacing(8);
+
 
     // 4. Continue 버튼
     continueButton = new QPushButton("완료", this);
@@ -261,6 +276,81 @@ void AddTransaction::handleContinueClicked()
     rawAmount.remove(QRegularExpression("[₩,\\s]"));
     long long inputAmount = rawAmount.toLongLong();
 
+    // Category가 비었는 지 확인하기
+    if (selectedCategory.isEmpty()) {
+        QDialog *dialog = new QDialog(this);
+        dialog->setFixedSize(300, 180);
+        dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);  // 테두리 유지
+
+        dialog->setStyleSheet(R"(
+        QDialog {
+            background-color: #ffffff;
+            border: 1px solid #E0E0E0;
+            border-radius: 16px;
+        }
+
+        QLabel#Title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2C2C2C;
+        }
+
+        QLabel#Message {
+            font-size: 14px;
+            color: #555555;
+            padding: 0 20px;
+        }
+
+        QPushButton {
+            background-color: #FF5E5E;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        QPushButton:hover {
+            background-color: #E14C4C;
+        }
+
+        QPushButton:pressed {
+            background-color: #B73838;
+        }
+    )");
+
+        QVBoxLayout *layout = new QVBoxLayout(dialog);
+        layout->setContentsMargins(20, 20, 20, 20);
+        layout->setSpacing(12);
+
+        QLabel *title = new QLabel("Warning!", dialog);
+        title->setObjectName("Title");
+        title->setAlignment(Qt::AlignCenter);
+
+        QLabel *message = new QLabel("카테고리를 선택해주세요.", dialog);
+        message->setObjectName("Message");
+        message->setAlignment(Qt::AlignCenter);
+
+        QPushButton *okButton = new QPushButton("확인", dialog);
+        okButton->setCursor(Qt::PointingHandCursor);
+        okButton->setFixedWidth(100);
+        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
+
+        QHBoxLayout *btnLayout = new QHBoxLayout;
+        btnLayout->addStretch();
+        btnLayout->addWidget(okButton);
+        btnLayout->addStretch();
+
+        layout->addWidget(title);
+        layout->addWidget(message);
+        layout->addLayout(btnLayout);
+
+        dialog->exec();
+        return;
+    }
+
+
     // 예외처리: 0원 이상만 등록 가능
     if (inputAmount == 0) {
         QDialog *dialog = new QDialog(this);
@@ -341,7 +431,7 @@ void AddTransaction::handleContinueClicked()
         return;
     }
 
-    QString category = categoryComboBox->currentText();
+    QString category = selectedCategory;
     QString datetime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
     // 현재 총 잔액 계산

@@ -114,8 +114,8 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
 
     mainLayout->addSpacing(12);
     QHBoxLayout *headerLayout = new QHBoxLayout();
-    listHistoryTitle = new QLabel("거래 내역");
-    listHistoryTitle->setStyleSheet("font-size: 18px; color: #4F4F4F;");
+    listHistoryTitle = new QLabel("가계 내역");
+    listHistoryTitle->setStyleSheet("font-size: 14px; color: #4F4F4F;");
     filterBtn = new QToolButton(this);
     filterBtn->setText("전체");
     filterBtn->setPopupMode(QToolButton::InstantPopup);
@@ -133,9 +133,9 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
     QMenu::item {
         background-color: white;
         color: #030303;
-        font-size: 14px;
-        padding: 10px 16px;
-        border-radius: 8px;
+        font-size: 12px;
+        padding: 8px 12px;
+        border-radius: 4px;
         margin: 2px;
     }
     QMenu::item:selected {
