@@ -331,7 +331,7 @@ void AddTransaction::handleContinueClicked()
 void AddTransaction::showWarningDialog(const QString &message)
 {
     QDialog *dialog = new QDialog(this);
-    dialog->setWindowTitle("ERROR");
+    dialog->setWindowTitle("Warning");
     dialog->setFixedSize(300, 180);
     dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 

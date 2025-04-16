@@ -91,6 +91,7 @@ void SignupDialog::handleSignup() {
 
 void SignupDialog::showWarningDialog(const QString &message) {
     QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle("가입실패");
     dialog->setFixedSize(300, 180);
     dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     dialog->setStyleSheet(R"(
@@ -163,6 +164,7 @@ void SignupDialog::showWarningDialog(const QString &message) {
 
 void SignupDialog::showSuccessDialog(const QString &message) {
     QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle("가입성공");
     dialog->setFixedSize(300, 180);
     dialog->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     dialog->setStyleSheet(R"(
