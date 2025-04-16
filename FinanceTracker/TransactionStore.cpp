@@ -56,7 +56,7 @@ void loadFromDB(const QString &username) {
 
 void addTransaction(const QString &username, const TransactionData &data) {
     QSqlQuery query;
-    query.prepare("INSERT INTO transactions (username, category, amount, isExpense, dateTime) VALUES (?, ?, ?, ?, ?)");
+    query.prepare("INSERT INTO transactions (username, category, amount, isExpense, dateTime, memo) VALUES (?, ?, ?, ?, ?, ?)");
     query.addBindValue(username);
     query.addBindValue(data.category);
     query.addBindValue(data.amount);
@@ -66,6 +66,8 @@ void addTransaction(const QString &username, const TransactionData &data) {
 
     if (!query.exec()) {
         qDebug() << "저장 오류:" << query.lastError().text();
+    } else {
+        qDebug() << "거래 저장 성공!";
     }
 
     allTransactions.append(data);
@@ -84,6 +86,19 @@ bool updateTransaction(int id, const QString &category, const QString &memo) {
     }
     return true;
 }
+
+bool deleteTransaction(int id) {
+    QSqlQuery query;
+    query.prepare("DELETE FROM transactions WHERE id = ?");
+    query.addBindValue(id);
+
+    if (!query.exec()) {
+        qDebug() << "삭제 실패:" << query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 
 
 }
