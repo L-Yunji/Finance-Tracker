@@ -7,12 +7,14 @@
 #include <QToolButton>
 #include <QMenu>
 
-MainTransaction::MainTransaction(QWidget *parent)
-    : QMainWindow(parent)
+MainTransaction::MainTransaction(const QString &username, QWidget *parent)
+    : QMainWindow(parent), currentUsername(username)
 {
     setFixedSize(360, 640);
     setStyleSheet("background-color: white;");
     setWindowTitle("가계부");
+
+    TransactionStore::loadFromDB(username);
 
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
@@ -98,13 +100,13 @@ MainTransaction::MainTransaction(QWidget *parent)
     mainLayout->addLayout(btnLayout);
 
     connect(sendBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction(true);
+        AddTransaction *addWin = new AddTransaction(true, currentUsername);
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
         addWin->move(this->x() + 30, this->y() + 30);
         addWin->show();
     });
     connect(getBtn, &QPushButton::clicked, this, [=]() {
-        AddTransaction *addWin = new AddTransaction(false);
+        AddTransaction *addWin = new AddTransaction(false, currentUsername);
         connect(addWin, &AddTransaction::transactionAdded, this, &MainTransaction::refreshTransactionList);
         addWin->move(this->x() + 30, this->y() + 30);
         addWin->show();
@@ -209,6 +211,7 @@ MainTransaction::MainTransaction(QWidget *parent)
 
     currentFilter = "전체";
     loadTransactionHistory();
+    updateCurrentBalance();
     setCentralWidget(centralWidget);
 }
 
