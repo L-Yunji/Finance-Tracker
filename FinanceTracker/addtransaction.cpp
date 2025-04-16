@@ -88,10 +88,18 @@ void AddTransaction::setupUI()
     // 2. 금액 표시
     displayLabel = new QLabel("₩0");
     QFont font = displayLabel->font();
-    font.setPointSize(32);
+    font.setPointSize(30);
     font.setBold(true);
     displayLabel->setFont(font);
-    displayLabel->setStyleSheet("color: #030303");
+    displayLabel->setStyleSheet(R"(
+    QLabel {
+        color: #030303;
+        qproperty-alignment: 'AlignRight';
+    }
+)");
+    displayLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    displayLabel->setMinimumWidth(0);
+    displayLabel->setMaximumWidth(QWIDGETSIZE_MAX);
     displayLabel->setFixedHeight(70);
     mainLayout->addWidget(displayLabel);
     mainLayout->addSpacing(12);
@@ -189,6 +197,8 @@ void AddTransaction::handleKeyInput(const QString &input)
 {
     QString currentText = displayLabel->text();
     currentText.remove(QRegularExpression("[^0-9]")); // 숫자만 남김
+
+    if (currentText.length() >= 9) return;
 
     if (currentText == "0") {
         currentText = input;

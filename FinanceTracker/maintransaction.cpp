@@ -50,9 +50,12 @@ MainTransaction::MainTransaction(const QString &username, QWidget *parent)
     curMoneyTitle->setStyleSheet("font-size: 18px; color: #4F4F4F;");
     curMoneyTitle->setFixedHeight(38);
     curMoneyTitle->setContentsMargins(0, 0, 0, 0);
+
     curMoney = new QLabel("₩0");
-    curMoney->setStyleSheet("font-size: 42px; font-weight: bold;");
-    curMoney->setFixedHeight(50);
+    curMoney->setStyleSheet("font-size: 32px; font-weight: bold; color: #030303;");
+    curMoney->setFixedHeight(60);
+    curMoney->setMinimumWidth(320);
+    curMoney->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);  // 좌측 정렬
 
     layoutBalanceSection->addWidget(curMoneyTitle);
     layoutBalanceSection->addWidget(curMoney);
