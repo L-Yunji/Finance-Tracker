@@ -224,6 +224,7 @@ void DetailTransaction::setTransaction(const TransactionData &data)
 
     balanceLabel->setText("<span style='color:" + typeColor + "; font-size:12px; font-weight: bold;'>" + typeText + "</span>");
     currentTransaction = data;
+    currentTransaction.id = data.id;
 }
 
 void DetailTransaction::onUpdateClicked()
